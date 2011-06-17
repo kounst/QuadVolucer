@@ -1,0 +1,3 @@
+QuadVolucer
+
+QuadVolucer is a Quadcopter project basend on the STM32 Microcontroller. It uses a ITG-3200 3-axis gyroskope.
