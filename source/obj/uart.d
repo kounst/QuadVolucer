@@ -20,3 +20,7 @@
 .\obj\uart.o: ..\STM32F10x_StdPeriph_Lib_V3.4.0\Libraries\STM32F10x_StdPeriph_Driver\inc\stm32f10x_usart.h
 .\obj\uart.o: ..\STM32F10x_StdPeriph_Lib_V3.4.0\Libraries\STM32F10x_StdPeriph_Driver\inc\misc.h
 .\obj\uart.o: .\inc\UART.h
+.\obj\uart.o: C:\Keil\ARM\RV31\INC\stdio.h
+.\obj\uart.o: C:\Keil\ARM\RV31\INC\string.h
+.\obj\uart.o: .\inc\main.h
+.\obj\uart.o: .\inc\GPIO.h

@@ -14,6 +14,7 @@
 #include "GPIO.h"
 #include "I2C.h"
 #include "rcdsl.h"
+#include "UART.h"
 
   /** I2C addresses */
 #define LEFT  0x58
@@ -35,9 +36,10 @@ uint8_t n = 8;
 
 extern struct props gas;
 extern uint8_t NbrOfDataToTransfer;
+extern uint8_t NoofByte;
 extern uint16_t vadc;
 extern uint8_t lowbat_flag;
-
+extern uint8_t *TxBuf;
 
 
 /******************************************************************************/
@@ -475,17 +477,26 @@ void RTCAlarm_IRQHandler(void)
 *******************************************************************************/
 void USART1_IRQHandler(void)
 {
+  static uint8_t count = 0;
+
   if(USART_GetITStatus(USART1, USART_IT_TXE) != RESET)
   {   
     /* Write one byte to the transmit data register */
-    USART_SendData(USART1, TxBuffer[TxCounter++]);                    
+    USART_SendData(USART1, TxBuf[count]);                    
+    count++;
 
-    if(TxCounter == NbrOfDataToTransfer || TxBuffer[TxCounter-1] == '\n')
+    if(count == NoofByte)
     {
       /* Disable the USART1 Transmit interrupt */
       USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
-      TxCounter = 0;      
+      count = 0;   
+         
     }  
+  }
+
+  if(USART_GetITStatus(USART1, USART_IT_RXNE) != RESET)
+  {
+    GUI_receive((uint8_t)USART_ReceiveData(USART1));
   }
 }
 

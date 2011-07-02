@@ -59,6 +59,7 @@ void I2C_Configuration(void);
 void I2C2_Configuration(void);
 void CalibrateRC(void);
 void CalibrateGyro(void);
+void GUI_com(void);
 
 //extern union channels set; //temporary
 //extern struct pid level;
@@ -119,14 +120,14 @@ int main(void)
 
   Delay(3000);
 
-  if((pulswidth.puls.pw4 < 8700) && (pulswidth.puls.pw3 < 8700))    //stick position: lower left corner
-  { 
-    QuadC_LEDOn(LED2);
-    while(pulswidth.puls.pw3 < 9000);
-    Delay(100);
-    QuadC_LEDOff(LED2);
-    CalibrateRC();
-  }
+//  if((pulswidth.puls.pw4 < 8700) && (pulswidth.puls.pw3 < 8700))    //stick position: lower left corner
+//  { 
+//    QuadC_LEDOn(LED2);
+//    while(pulswidth.puls.pw3 < 9000);
+//    Delay(100);
+//    QuadC_LEDOff(LED2);
+//    CalibrateRC();
+//  }
 
   CalibrateGyro();
 
@@ -156,6 +157,8 @@ int main(void)
       //sprintf(TxBuffer,"Gas.front: %5d; Gas.rear: %5d; Gas.left: %5d; Gas.right: %5d;\r\n",gas.front, gas.rear, gas.left, gas.right);
       //sprintf(TxBuffer,"K_p:%5f; K_i:%5f; K_d:%5f;\r\n",K_p, K_i, K_d);
       //USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+
+      GUI_com();
 
       if(vadc < LOWBAT)
       {

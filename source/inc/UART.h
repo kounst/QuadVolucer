@@ -5,3 +5,4 @@
 
 void UART_Configuration(void);
 void USART_RC_Config(void);
+void GUI_receive(char);

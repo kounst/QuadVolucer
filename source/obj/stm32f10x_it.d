@@ -24,3 +24,4 @@
 .\obj\stm32f10x_it.o: .\inc\GPIO.h
 .\obj\stm32f10x_it.o: .\inc\I2C.h
 .\obj\stm32f10x_it.o: src\rcdsl.h
+.\obj\stm32f10x_it.o: .\inc\UART.h

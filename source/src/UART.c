@@ -6,6 +6,33 @@
 
 #include "stm32f10x.h"
 #include "UART.h"
+#include "stdio.h"
+#include "string.h"
+#include "main.h"
+#include "GPIO.h"
+
+char msg[20];
+
+extern char TxBuffer[];
+extern union channels set;
+extern union pulsw pulswidth;
+extern float K_p, K_i, K_d;
+extern float K_pY, K_iY, K_dY;
+
+char gui_SENSOR[13];
+char gui_PARA[33];
+char gui_packet[39];
+
+char *TxBuf;
+
+volatile uint8_t gui_RESET = 0;
+volatile uint8_t gui_READpara = 0;
+volatile uint8_t gui_READsens = 0;
+volatile uint8_t gui_SEND = 0;
+uint8_t NoofByte = 0;
+
+extern int16_t GyroX,GyroY,GyroZ;
+extern uint16_t vadc;
 
 /*******************************************************************************
 * Function Name  : USART_Configuration
@@ -16,9 +43,9 @@
 *******************************************************************************/
 void USART_Configuration()
 {
-  /* USART2 configuration ------------------------------------------------------*/
-  /* USART2 configured as follow:
-        - BaudRate = 115200 baud  
+  /* USART1 configuration ------------------------------------------------------*/
+  /* USART1 configured as follow:
+        - BaudRate = 38400 baud  
         - Word Length = 8 Bits
         - One Stop Bit
         - Odd parity
@@ -26,10 +53,10 @@ void USART_Configuration()
         - Receive and transmit enabled
   */
   USART_InitTypeDef USART_InitStructure;
-  USART_InitStructure.USART_BaudRate = 115200;	//115200Baud/s
+  USART_InitStructure.USART_BaudRate = 38400;
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;
-  USART_InitStructure.USART_Parity = USART_Parity_Odd;
+  USART_InitStructure.USART_Parity = USART_Parity_No;
   USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
   USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 
@@ -67,4 +94,162 @@ void USART_RC_Config()
 
   /* Enable USART2 */
   USART_Cmd(USART2, ENABLE);
+}
+
+/*******************************************************************************
+* Function Name  : GUI_com()
+* Description    : 
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void GUI_com()
+{
+  uint8_t i = 0;
+
+  if(gui_RESET)
+  {
+    //reset device
+    gui_RESET = 0; //reset flag
+    QuadC_LEDToggle(LED2);
+
+  }
+
+  if(gui_READpara)
+  {
+    
+
+    gui_READpara = 0; //reset flag
+    //send parameter to pc
+
+    gui_PARA[0]  = 1;                         //motors enable                 - not implemented
+    gui_PARA[1]  = 0;                         //gyro_roll_dir                 - not implemented
+    gui_PARA[2]  = 0;                         //gyro_pitch_dir                - not implemented
+    gui_PARA[3]  = 0;                         //gyro_yaw_dir                  - not implemented
+    gui_PARA[4]  = 0;                         //acc_x_dir                     - not implemented
+    gui_PARA[5]  = 0;                         //acc_y_dir                     - not implemented
+    gui_PARA[6]  = (uint8_t)(K_p * 255);      //P_Gain
+    gui_PARA[7]  = (uint8_t)(K_i * 255);      //I_Gain
+    gui_PARA[8]  = 0;                         //P_Gain_angle                  - not implemented
+    gui_PARA[9]  = 0;                         //I_Gain_angle                  - not implemented
+    gui_PARA[10] = 0;                         //D_Gain_angle                  - not implemented
+    gui_PARA[11] = (uint8_t)(K_pY * 255);     //P_Gain_yaw
+    gui_PARA[12] = (uint8_t)(K_iY * 255);     //I_Gain_yaw
+    gui_PARA[13] = 0;                         //ACC influence sensorfusion    - not implemented
+    gui_PARA[14] = 0;                         //acc_x scale                   - not implemented
+    gui_PARA[15] = 0;                         //acc_y scale                   - not implemented
+    gui_PARA[16] = 0;                         //expo                          - not implemented
+    gui_PARA[17] = 0;                         //expo                          - not implemented
+    gui_PARA[18] = 0;                         //expo                          - not implemented
+    gui_PARA[19] = 0;                         //expo                          - not implemented
+    gui_PARA[20] = 30;                        //minimum throttle              - hardcoded 
+    gui_PARA[21] = (uint8_t)(LOWBAT / 10.9);  //voltage warning               - define
+    gui_PARA[22] = 0;                         //acc_x offset                  - not implemented
+    gui_PARA[23] = 0;                         //acc_y offset                  - not implemented
+    gui_PARA[24] = 4;                         //throttle channel              - hardcoded
+    gui_PARA[25] = 2;                         //pitch channel                 - hardcoded
+    gui_PARA[26] = 1;                         //roll channel                  - hardcoded
+    gui_PARA[27] = 3;                         //yaw channel                   - hardcoded
+    gui_PARA[28] = (uint8_t)(K_d * 255);      //D_Gain
+    gui_PARA[29] = 0;                         //D2_Gain                       - not implemented
+    gui_PARA[30] = 0;                         //n/a
+    gui_PARA[31] = 0;                         //n/a
+    gui_PARA[32] = 0;                         //n/a
+
+    strcpy(gui_packet, "s#p!\r\n");
+    for(i = 0; i < 33; i++)
+    {
+      gui_packet[i+6] = gui_PARA[i];
+    }
+
+    TxBuf = gui_packet;
+    NoofByte = 39;
+    USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //trigger UART transmission
+
+
+    
+  }
+
+  if(gui_READsens)
+  {
+    //send sensor data to pc
+    gui_READsens = 0; //reset flag
+
+    //scale sensor values for transmission
+    gui_SENSOR[0]  = (uint8_t)((GyroX / 128) + 128);
+    gui_SENSOR[1]  = 0; //angle
+    gui_SENSOR[2]  = 0; //acc
+    gui_SENSOR[3]  = (uint8_t)((GyroY / 128) + 128);
+    gui_SENSOR[4]  = 0;  //angle
+    gui_SENSOR[5]  = 0;  //acc
+    gui_SENSOR[6]  = (uint8_t)((GyroZ / 128) + 128);
+    gui_SENSOR[7]  = (uint8_t)(set.rotate.throttle / 20);
+    gui_SENSOR[8]  = (uint8_t)((set.rotate.roll + 3825) / 30);
+    gui_SENSOR[9]  = (uint8_t)((set.rotate.pitch + 3825) / 30);
+    gui_SENSOR[10] = (uint8_t)((set.rotate.yaw + 3825) / 30);
+    gui_SENSOR[11] = (uint8_t)((pulswidth.puls.pw6 - 7350) / 30);
+    gui_SENSOR[12] = (uint8_t)((vadc / 5.44) - 256);
+
+
+    strcpy(gui_packet, "ss!\r\n");
+    for(i = 0; i < 13; i++)
+    {
+      gui_packet[i+5] = gui_SENSOR[i];
+    }
+    TxBuf = gui_packet;
+    NoofByte = 18;
+    USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //trigger UART transmission
+
+  }
+
+  if(gui_SEND)
+  {
+    //receive data from pc
+    gui_SEND = 0; //reset flag
+  }
+}
+
+
+
+/*******************************************************************************
+* Function Name  : GUI_receive()
+* Description    : 
+* Input          : None
+* Output         : None
+* Return         : None
+*******************************************************************************/
+void GUI_receive(char c)
+{
+  static uint8_t rx_count = 0;
+  //static char msg[20];
+
+  msg[rx_count] = c;
+
+  if(msg[rx_count] == '!' || rx_count > 18)
+  {
+    rx_count = 0;
+    if(strstr(msg,"reset!"))  //if(strstr(msg,"reset!"))
+    {
+      gui_RESET = 1;
+    }  
+    if(strstr(msg,"cr!"))
+    {
+      //pc wants to read data
+      gui_READpara = 1;
+    }
+    if(strstr(msg,"cs!"))
+    {
+      //pc wants to read sensor
+      gui_READsens = 1;
+    }
+    if(strstr(msg,"ci!"))
+    {
+      //pc wants to send data
+      gui_SEND = 1;
+    }
+  }
+  else
+  {
+    rx_count++;
+  }
 }
