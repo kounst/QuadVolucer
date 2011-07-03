@@ -15,10 +15,19 @@ void TimingDelay_Decrement  (void);
 
 #define LOWBAT  1966          //9V  1V == 218,4905
 
-#define NEUTRAL_ROTATE_ROLL     11059
+//if there is no stored value in the eeprom this will be used-----
+#define NEUTRAL_ROTATE_ROLL     11059               
 #define NEUTRAL_ROTATE_PITCH    11059
 #define NEUTRAL_ROTATE_YAW      11059
 #define NEUTRAL_ROTATE_THROTTLE 8300
+
+#define P_GAIN                  0.122
+#define I_GAIN                  0
+#define D_GAIN                  0
+#define P_GAINY                 0.05
+#define I_GAINY                 0
+#define D_GAINY                 0
+//-----------------------------------------------------------------
 
 /*Define names for Virtual addresses stored in: 
 /   volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4}; */
@@ -26,6 +35,12 @@ void TimingDelay_Decrement  (void);
 #define neutral_pw2     0x6666
 #define neutral_pw3     0x7777
 #define neutral_pw4     0x8888
+#define p_gain          0x9999
+#define i_gain          0x4444
+#define d_gain          0x3333
+#define p_gainy         0x2222
+#define i_gainy         0x1111
+#define d_gainy         0x1234
 
 
 union pulsw

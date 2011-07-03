@@ -10,8 +10,9 @@
 #include "string.h"
 #include "main.h"
 #include "GPIO.h"
+#include "eeprom.h"
 
-char msg[20];
+char msg[40];
 
 extern char TxBuffer[];
 extern union channels set;
@@ -29,6 +30,7 @@ volatile uint8_t gui_RESET = 0;
 volatile uint8_t gui_READpara = 0;
 volatile uint8_t gui_READsens = 0;
 volatile uint8_t gui_SEND = 0;
+volatile uint8_t gui_rx_finished = 0;
 uint8_t NoofByte = 0;
 
 extern int16_t GyroX,GyroY,GyroZ;
@@ -113,6 +115,26 @@ void GUI_com()
     gui_RESET = 0; //reset flag
     //QuadC_LEDToggle(LED2);
 
+  }
+
+  if(gui_rx_finished)
+  {
+    //receive data from pc
+    K_p = (float)gui_PARA[6] / 255;
+    K_i = (float)gui_PARA[7] / 255;
+    K_d = (float)gui_PARA[28] / 255;
+    K_pY = (float)gui_PARA[11] / 255;
+    K_iY = (float)gui_PARA[12] / 255;
+
+    FLASH_Unlock();
+    EE_WriteVariable(p_gain, (uint16_t)gui_PARA[6]);
+    EE_WriteVariable(i_gain, (uint16_t)gui_PARA[7]);
+    EE_WriteVariable(d_gain, (uint16_t)gui_PARA[28]);
+    EE_WriteVariable(p_gainy, (uint16_t)gui_PARA[11]);
+    EE_WriteVariable(i_gainy, (uint16_t)gui_PARA[12]);
+    FLASH_Lock();
+
+    gui_rx_finished = 0;                                                  //reset flag
   }
 
   if(gui_READpara)
@@ -201,12 +223,6 @@ void GUI_com()
     USART_ITConfig(USART1, USART_IT_TXE, ENABLE);                   //trigger UART transmission
 
   }
-
-  if(gui_SEND)
-  {
-    //receive data from pc
-    gui_SEND = 0;                                                   //reset flag
-  }
 }
 
 
@@ -221,35 +237,49 @@ void GUI_com()
 void GUI_receive(char c)
 {
   static uint8_t rx_count = 0;
+  uint8_t i;
   //static char msg[20];
 
   msg[rx_count] = c;
-
-  if(msg[rx_count] == '!' || rx_count > 18)
+  rx_count++;
+  if(gui_SEND)
   {
-    rx_count = 0;
-    if(strstr(msg,"reset!"))  //if(strstr(msg,"reset!"))
+    if(rx_count > 33)
     {
-      gui_RESET = 1;
-    }  
-    if(strstr(msg,"cr!"))
-    {
-      //pc wants to read data
-      gui_READpara = 1;
-    }
-    if(strstr(msg,"cs!"))
-    {
-      //pc wants to read sensor
-      gui_READsens = 1;
-    }
-    if(strstr(msg,"ci!"))
-    {
-      //pc wants to send data
-      gui_SEND = 1;
+      rx_count = 0;
+      gui_rx_finished = 1;
+      gui_SEND = 0;
+      for(i = 0; i< 33; i++)
+      {
+        gui_PARA[i] = msg[i+1];
+      }
     }
   }
   else
   {
-    rx_count++;
+    if(c == '!' || rx_count >= 35)
+    {
+      rx_count = 0;
+      if(strstr(msg,"reset!")) 
+      {
+        gui_RESET = 1;
+      }  
+      if(strstr(msg,"cr!"))
+      {
+        //pc wants to read data
+        gui_READpara = 1;
+      }
+      if(strstr(msg,"cs!"))
+      {
+        //pc wants to read sensor
+        gui_READsens = 1;
+      }
+      if(strstr(msg,"ci!"))
+      {
+        //pc wants to send data
+        gui_SEND = 1;
+        rx_count = 0;
+      }
+    }
   }
 }

@@ -27,15 +27,11 @@ extern union pulsw pulswidth;
 extern int16_t GyroX, GyroY, GyroZ;
 int differential_error =0;
 
-float K_p;
-float K_i;
-float K_d;
+volatile float K_p, K_i, K_d;
 
 int temp;
 
-float K_pY = 0;
-float K_iY = 0;
-float K_dY = 0;
+volatile float K_pY, K_iY, K_dY;
 
 
 
@@ -126,17 +122,17 @@ void mixer()
 *******************************************************************************/
 void levelcontroller(int16_t gyro, int axis)
 {
-	K_i = 0;//0.000090;
+	//K_i = 0;//0.000090;
 //  K_i = ((float)pulswidth.puls.pw7 - 7300)/3650000;
 //	if(K_i < 0)
 //	  K_i = 0;
 	
-  K_p = 0.122;
+  //K_p = 0.122;
 //	K_p = ((float)pulswidth.puls.pw5 - 7300)/10000;
 //  if(K_p < 0)
 //     K_p = 0;
 	
-	K_d = 0;
+	//K_d = 0;
 //  K_d = ((float)pulswidth.puls.pw7 - 7600)/1000;
 //  if(K_d < 0)
 //    K_d = 0;
@@ -179,8 +175,8 @@ void levelcontroller(int16_t gyro, int axis)
 void yawcontroller(int16_t gyro)
 {
   //gyro = 0;
-  K_pY = ((float)pulswidth.puls.pw7 - 7300)/73000;
-    K_pY = 0.050;
+  //K_pY = ((float)pulswidth.puls.pw7 - 7300)/73000;
+  //  K_pY = 0.050;
   //if(K_pY < 0)
   yaw.yawerror = set.rotate.yaw*4 + gyro;
 

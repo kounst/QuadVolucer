@@ -41,12 +41,12 @@ uint8_t lowbat_flag = 0;
 
 
 /* Virtual address defined by the user: 0xFFFF value is prohibited */
-volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4};
-
-static __IO uint32_t TimingDelay;
-
-
-/* Private function prototypes -----------------------------------------------*/
+volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4, p_gain, i_gain, d_gain, p_gainy, i_gainy, d_gainy};
+                                                                                                  
+static __IO uint32_t TimingDelay;                                                                  
+                                                                                                  
+                                                                                                  
+/* Private function prototypes -----------------------------------------------*/                 
 void RCC_Configuration(void);
 void SysTick_Configuration(void);
 void NVIC_Configuration(void);
@@ -65,9 +65,8 @@ void GUI_com(void);
 //extern struct pid level;
 //extern struct pdyaw yaw;
 
-extern float K_p;
-extern float K_i;
-extern float K_d;
+extern float K_p, K_i, K_d;
+extern float K_pY, K_iY, K_dY;
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -281,28 +280,7 @@ void TimingDelay_Decrement(void)
   }
 }
 
-/* reads stored parameters from the emulated eeprom(flash) */
-//void readeeprom(void)
-//{
-//  if(!EE_ReadVariable(flashminpwm, &minpwm))        //if variable exists
-//    ;
-//  else                                              //else set to default
-//    minpwm = MINPWM;                                    
-//
-//  if(!EE_ReadVariable(flashmaxpwm, &maxpwm))        //if variable exists
-//    ;
-//  else                                              //else set to default
-//    maxpwm = MAXPWM;
-//  if(!EE_ReadVariable(flashaddress, &address))      //if variable exists
-//    ;
-//  else                                              //else set to default
-//    address = ADDRESS;
-//  if(!EE_ReadVariable(flashangle, &angle))          //if variable exists
-//    ;
-//  else                                              //else set to default
-//    angle = ANGLE;
-//  TxMessage.StdId = 0x010 | (address+1);
-//}
+
 
 
 
@@ -362,6 +340,7 @@ void CalibrateGyro()
 /* reads stored parameters from the emulated eeprom(flash) */
 void readeeprom(void)
 {
+  uint16_t temp;
   if(!EE_ReadVariable(neutral_pw1, (uint16_t *)&neutral.rotate.roll))        //if variable exists
     ;
   else                                                           //else set to default
@@ -381,6 +360,31 @@ void readeeprom(void)
     ;
   else                                                           //else set to default
     neutral.rotate.throttle = NEUTRAL_ROTATE_THROTTLE;
+
+  if(!EE_ReadVariable(p_gain, (uint16_t *)&temp))     //if variable exists
+    K_p = (float)temp / 255;
+  else                                                           //else set to default
+    K_p = P_GAIN;
+  if(!EE_ReadVariable(i_gain, (uint16_t *)&temp))     //if variable exists
+    K_i = (float)temp / 255;
+  else                                                           //else set to default
+    K_i = I_GAIN;
+  if(!EE_ReadVariable(d_gain, (uint16_t *)&temp))     //if variable exists
+    K_d = (float)temp / 255;
+  else                                                           //else set to default
+    K_d = D_GAIN;
+  if(!EE_ReadVariable(p_gainy, (uint16_t *)&temp))     //if variable exists
+    K_pY = (float)temp / 255;
+  else                                                           //else set to default
+    K_pY = P_GAINY;
+  if(!EE_ReadVariable(i_gainy, (uint16_t *)&temp))     //if variable exists
+    K_iY = (float)temp / 255;
+  else                                                           //else set to default
+    K_iY = I_GAINY;
+  if(!EE_ReadVariable(d_gainy, (uint16_t *)&temp))     //if variable exists
+    K_dY = (float)temp / 255;
+  else                                                           //else set to default
+    K_dY = D_GAINY;
 }
 
 

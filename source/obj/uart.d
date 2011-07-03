@@ -24,3 +24,4 @@
 .\obj\uart.o: C:\Keil\ARM\RV31\INC\string.h
 .\obj\uart.o: .\inc\main.h
 .\obj\uart.o: .\inc\GPIO.h
+.\obj\uart.o: .\inc\eeprom.h
