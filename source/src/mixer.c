@@ -86,7 +86,7 @@ void mixer()
 			mode_off();
 		
 			//pwrmode change
-			if(modeswitch > 9000)
+			if(modeswitch > 9000  && throttle < 8700)
 				pwrmode = standby;
 			break;
 		}

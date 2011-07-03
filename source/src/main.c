@@ -77,7 +77,7 @@ extern float K_d;
   * @retval None
   */
 int main(void)
-{    
+{   
   /* System Clocks Configuration */
   RCC_Configuration();
 
@@ -118,18 +118,26 @@ int main(void)
   /* I2C configuration for Gyro*/
   I2C_Configuration();
 
-  Delay(3000);
-
-//  if((pulswidth.puls.pw4 < 8700) && (pulswidth.puls.pw3 < 8700))    //stick position: lower left corner
-//  { 
-//    QuadC_LEDOn(LED2);
-//    while(pulswidth.puls.pw3 < 9000);
-//    Delay(100);
-//    QuadC_LEDOff(LED2);
-//    CalibrateRC();
-//  }
-
-  CalibrateGyro();
+  if((RCC_GetFlagStatus(RCC_FLAG_PORRST) == SET))               //calibrate only if there was a powerdown reset
+  {
+    RCC_ClearFlag();                                            //clears all reset flags
+    Delay(3000);
+  
+    if((pulswidth.puls.pw4 < 8700) && (pulswidth.puls.pw3 < 8700))    //stick position: lower left corner
+    { 
+      QuadC_LEDOn(LED2);
+      while(pulswidth.puls.pw3 < 9000);
+      Delay(100);
+      QuadC_LEDOff(LED2);
+      CalibrateRC();
+    }
+  
+    CalibrateGyro();
+  }
+  else
+  {
+    QuadC_LEDOn(LED2);                                          //turn on red LED if unknown resed occured
+  }
 
   QuadC_LEDOn(LED1);     //boot process finished
 

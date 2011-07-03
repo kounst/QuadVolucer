@@ -111,7 +111,7 @@ void GUI_com()
   {
     //reset device
     gui_RESET = 0; //reset flag
-    QuadC_LEDToggle(LED2);
+    //QuadC_LEDToggle(LED2);
 
   }
 
@@ -156,7 +156,7 @@ void GUI_com()
     gui_PARA[31] = 0;                         //n/a
     gui_PARA[32] = 0;                         //n/a
 
-    strcpy(gui_packet, "s#p!\r\n");
+    strcpy(gui_packet, "s#p!\r\n");           //tell pc that there a parameter about to be sent
     for(i = 0; i < 33; i++)
     {
       gui_packet[i+6] = gui_PARA[i];
@@ -173,17 +173,17 @@ void GUI_com()
   if(gui_READsens)
   {
     //send sensor data to pc
-    gui_READsens = 0; //reset flag
+    gui_READsens = 0;                                               //reset flag
 
     //scale sensor values for transmission
-    gui_SENSOR[0]  = (uint8_t)((GyroX / 128) + 128);
-    gui_SENSOR[1]  = 0; //angle
-    gui_SENSOR[2]  = 0; //acc
-    gui_SENSOR[3]  = (uint8_t)((GyroY / 128) + 128);
-    gui_SENSOR[4]  = 0;  //angle
-    gui_SENSOR[5]  = 0;  //acc
+    gui_SENSOR[0]  = (uint8_t)((GyroY / 128) + 128);
+    gui_SENSOR[1]  = 0;                                             //angle
+    gui_SENSOR[2]  = 0;                                             //acc
+    gui_SENSOR[3]  = (uint8_t)((GyroX / 128) + 128);
+    gui_SENSOR[4]  = 0;                                             //angle
+    gui_SENSOR[5]  = 0;                                             //acc
     gui_SENSOR[6]  = (uint8_t)((GyroZ / 128) + 128);
-    gui_SENSOR[7]  = (uint8_t)(set.rotate.throttle / 20);
+    gui_SENSOR[7]  = (uint8_t)((set.rotate.throttle + 500) / 20);
     gui_SENSOR[8]  = (uint8_t)((set.rotate.roll + 3825) / 30);
     gui_SENSOR[9]  = (uint8_t)((set.rotate.pitch + 3825) / 30);
     gui_SENSOR[10] = (uint8_t)((set.rotate.yaw + 3825) / 30);
@@ -198,14 +198,14 @@ void GUI_com()
     }
     TxBuf = gui_packet;
     NoofByte = 18;
-    USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //trigger UART transmission
+    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);                   //trigger UART transmission
 
   }
 
   if(gui_SEND)
   {
     //receive data from pc
-    gui_SEND = 0; //reset flag
+    gui_SEND = 0;                                                   //reset flag
   }
 }
 
