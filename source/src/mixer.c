@@ -25,6 +25,7 @@ extern union channels neutral;
 extern union pulsw pulswidth;
 
 extern int16_t GyroX, GyroY, GyroZ;
+volatile uint8_t idle_throttle;
 int differential_error =0;
 
 volatile float K_p, K_i, K_d;
@@ -201,10 +202,10 @@ void mode_off()
 
 void mode_standby()
 {
-	gas.front = 30;
-	gas.rear = 30;
-	gas.left = 30;
-	gas.right = 30;
+	gas.front = idle_throttle;
+	gas.rear = idle_throttle;
+	gas.left = idle_throttle;
+	gas.right = idle_throttle;
 
 }
 
@@ -322,8 +323,8 @@ void mode_flight()
   
   temp = limitStep(gas.front, temp);
 
-	if(temp < 30)
-		gas.front = 30;
+	if(temp < idle_throttle)
+		gas.front = idle_throttle;
 	else
 	{
 		if(temp > 255)
@@ -337,8 +338,8 @@ void mode_flight()
 
   temp = limitStep(gas.rear, temp);
 
-	if(temp < 30)
-		gas.rear = 30;
+	if(temp < idle_throttle)
+		gas.rear = idle_throttle;
 	else
 	{
 		if(temp > 255)
@@ -352,8 +353,8 @@ void mode_flight()
 
   temp = limitStep(gas.left, temp);
 
-	if(temp < 30)
-		gas.left = 30;
+	if(temp < idle_throttle)
+		gas.left = idle_throttle;
 	else
 	{
 		if(temp > 255)
@@ -367,8 +368,8 @@ void mode_flight()
 
   temp = limitStep(gas.right, temp);
 
-	if(temp < 30)
-		gas.right = 30;
+	if(temp < idle_throttle)
+		gas.right = idle_throttle;
 	else
 	{
 		if(temp > 255)

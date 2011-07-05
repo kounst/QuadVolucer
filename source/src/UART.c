@@ -19,6 +19,7 @@ extern union channels set;
 extern union pulsw pulswidth;
 extern float K_p, K_i, K_d;
 extern float K_pY, K_iY, K_dY;
+extern uint8_t idle_throttle;
 
 char gui_SENSOR[13];
 char gui_PARA[33];
@@ -35,6 +36,7 @@ uint8_t NoofByte = 0;
 
 extern int16_t GyroX,GyroY,GyroZ;
 extern uint16_t vadc;
+extern uint16_t low_bat;
 
 /*******************************************************************************
 * Function Name  : USART_Configuration
@@ -125,6 +127,8 @@ void GUI_com()
     K_d = (float)gui_PARA[28] / 255;
     K_pY = (float)gui_PARA[11] / 255;
     K_iY = (float)gui_PARA[12] / 255;
+    idle_throttle = gui_PARA[20];
+    low_bat = (uint16_t)gui_PARA[21] * 11.09;
 
     FLASH_Unlock();
     EE_WriteVariable(p_gain, (uint16_t)gui_PARA[6]);
@@ -132,6 +136,8 @@ void GUI_com()
     EE_WriteVariable(d_gain, (uint16_t)gui_PARA[28]);
     EE_WriteVariable(p_gainy, (uint16_t)gui_PARA[11]);
     EE_WriteVariable(i_gainy, (uint16_t)gui_PARA[12]);
+    EE_WriteVariable(lowbat, (uint16_t)gui_PARA[21]);
+    EE_WriteVariable(idlethrottle, (uint16_t)gui_PARA[20]);
     FLASH_Lock();
 
     gui_rx_finished = 0;                                                  //reset flag
@@ -144,41 +150,41 @@ void GUI_com()
     gui_READpara = 0; //reset flag
     //send parameter to pc
 
-    gui_PARA[0]  = 1;                         //motors enable                 - not implemented
-    gui_PARA[1]  = 0;                         //gyro_roll_dir                 - not implemented
-    gui_PARA[2]  = 0;                         //gyro_pitch_dir                - not implemented
-    gui_PARA[3]  = 0;                         //gyro_yaw_dir                  - not implemented
-    gui_PARA[4]  = 0;                         //acc_x_dir                     - not implemented
-    gui_PARA[5]  = 0;                         //acc_y_dir                     - not implemented
-    gui_PARA[6]  = (uint8_t)(K_p * 255);      //P_Gain
-    gui_PARA[7]  = (uint8_t)(K_i * 255);      //I_Gain
-    gui_PARA[8]  = 0;                         //P_Gain_angle                  - not implemented
-    gui_PARA[9]  = 0;                         //I_Gain_angle                  - not implemented
-    gui_PARA[10] = 0;                         //D_Gain_angle                  - not implemented
-    gui_PARA[11] = (uint8_t)(K_pY * 255);     //P_Gain_yaw
-    gui_PARA[12] = (uint8_t)(K_iY * 255);     //I_Gain_yaw
-    gui_PARA[13] = 0;                         //ACC influence sensorfusion    - not implemented
-    gui_PARA[14] = 0;                         //acc_x scale                   - not implemented
-    gui_PARA[15] = 0;                         //acc_y scale                   - not implemented
-    gui_PARA[16] = 0;                         //expo                          - not implemented
-    gui_PARA[17] = 0;                         //expo                          - not implemented
-    gui_PARA[18] = 0;                         //expo                          - not implemented
-    gui_PARA[19] = 0;                         //expo                          - not implemented
-    gui_PARA[20] = 30;                        //minimum throttle              - hardcoded 
-    gui_PARA[21] = (uint8_t)(LOWBAT / 10.9);  //voltage warning               - define
-    gui_PARA[22] = 0;                         //acc_x offset                  - not implemented
-    gui_PARA[23] = 0;                         //acc_y offset                  - not implemented
-    gui_PARA[24] = 4;                         //throttle channel              - hardcoded
-    gui_PARA[25] = 2;                         //pitch channel                 - hardcoded
-    gui_PARA[26] = 1;                         //roll channel                  - hardcoded
-    gui_PARA[27] = 3;                         //yaw channel                   - hardcoded
-    gui_PARA[28] = (uint8_t)(K_d * 255);      //D_Gain
-    gui_PARA[29] = 0;                         //D2_Gain                       - not implemented
-    gui_PARA[30] = 0;                         //n/a
-    gui_PARA[31] = 0;                         //n/a
-    gui_PARA[32] = 0;                         //n/a
+    gui_PARA[0]  = 1;                                 //motors enable                 - not implemented
+    gui_PARA[1]  = 0;                                 //gyro_roll_dir                 - not implemented
+    gui_PARA[2]  = 0;                                 //gyro_pitch_dir                - not implemented
+    gui_PARA[3]  = 0;                                 //gyro_yaw_dir                  - not implemented
+    gui_PARA[4]  = 0;                                 //acc_x_dir                     - not implemented
+    gui_PARA[5]  = 0;                                 //acc_y_dir                     - not implemented
+    gui_PARA[6]  = (uint8_t)(K_p * 255);              //P_Gain
+    gui_PARA[7]  = (uint8_t)(K_i * 255);              //I_Gain
+    gui_PARA[8]  = 0;                                 //P_Gain_angle                  - not implemented
+    gui_PARA[9]  = 0;                                 //I_Gain_angle                  - not implemented
+    gui_PARA[10] = 0;                                 //D_Gain_angle                  - not implemented
+    gui_PARA[11] = (uint8_t)(K_pY * 255);             //P_Gain_yaw
+    gui_PARA[12] = (uint8_t)(K_iY * 255);             //I_Gain_yaw
+    gui_PARA[13] = 0;                                 //ACC influence sensorfusion    - not implemented
+    gui_PARA[14] = 0;                                 //acc_x scale                   - not implemented
+    gui_PARA[15] = 0;                                 //acc_y scale                   - not implemented
+    gui_PARA[16] = 0;                                 //expo                          - not implemented
+    gui_PARA[17] = 0;                                 //expo                          - not implemented
+    gui_PARA[18] = 0;                                 //expo                          - not implemented
+    gui_PARA[19] = 0;                                 //expo                          - not implemented
+    gui_PARA[20] = idle_throttle;                                //minimum throttle  
+    gui_PARA[21] = (uint8_t)((uint16_t)low_bat / 11.09);         //voltage warning    
+    gui_PARA[22] = 0;                                 //acc_x offset                  - not implemented
+    gui_PARA[23] = 0;                                 //acc_y offset                  - not implemented
+    gui_PARA[24] = 4;                                 //throttle channel              - hardcoded
+    gui_PARA[25] = 2;                                 //pitch channel                 - hardcoded
+    gui_PARA[26] = 1;                                 //roll channel                  - hardcoded
+    gui_PARA[27] = 3;                                 //yaw channel                   - hardcoded
+    gui_PARA[28] = (uint8_t)(K_d * 255);              //D_Gain
+    gui_PARA[29] = 0;                                 //D2_Gain                       - not implemented
+    gui_PARA[30] = 0;                                 //n/a
+    gui_PARA[31] = 0;                                 //n/a
+    gui_PARA[32] = 0;                                 //n/a
 
-    strcpy(gui_packet, "s#p!\r\n");           //tell pc that there a parameter about to be sent
+    strcpy(gui_packet, "s#p!\r\n");                   //tell pc that there a parameter about to be sent
     for(i = 0; i < 33; i++)
     {
       gui_packet[i+6] = gui_PARA[i];
@@ -186,7 +192,7 @@ void GUI_com()
 
     TxBuf = gui_packet;
     NoofByte = 39;
-    USART_ITConfig(USART1, USART_IT_TXE, ENABLE); //trigger UART transmission
+    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);     //trigger UART transmission
 
 
     

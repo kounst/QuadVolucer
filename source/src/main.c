@@ -37,11 +37,13 @@ uint16_t tick = 0;
 uint8_t NbrOfDataToTransfer = TxBufferSize;
 uint16_t address = 0;
 volatile uint16_t vadc = 10000;
+volatile uint16_t low_bat = 0;
+extern uint8_t idle_throttle;
 uint8_t lowbat_flag = 0;
 
 
 /* Virtual address defined by the user: 0xFFFF value is prohibited */
-volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4, p_gain, i_gain, d_gain, p_gainy, i_gainy, d_gainy};
+volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4, p_gain, i_gain, d_gain, p_gainy, i_gainy, d_gainy, lowbat, idlethrottle};
                                                                                                   
 static __IO uint32_t TimingDelay;                                                                  
                                                                                                   
@@ -167,7 +169,7 @@ int main(void)
 
       GUI_com();
 
-      if(vadc < LOWBAT)
+      if(vadc < low_bat)
       {
         lowbat_flag = 1;
       }
@@ -385,6 +387,15 @@ void readeeprom(void)
     K_dY = (float)temp / 255;
   else                                                           //else set to default
     K_dY = D_GAINY;
+  if(!EE_ReadVariable(lowbat, (uint16_t *)&temp))     //if variable exists
+    low_bat = (uint16_t)temp * 11.09;
+  else                                                           //else set to default
+    low_bat = LOWBAT;
+  if(!EE_ReadVariable(idlethrottle, (uint16_t *)&idle_throttle))     //if variable exists
+    ;
+  else                                                           //else set to default
+    idle_throttle = IDLE_THROTTLE;
+
 }
 
 

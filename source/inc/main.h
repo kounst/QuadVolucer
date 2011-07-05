@@ -41,6 +41,9 @@ void TimingDelay_Decrement  (void);
 #define p_gainy         0x2222
 #define i_gainy         0x1111
 #define d_gainy         0x1234
+#define lowbat          0x4321
+#define idlethrottle    0x1122
+
 
 
 union pulsw

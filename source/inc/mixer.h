@@ -26,8 +26,8 @@ struct pdyaw
 };
 
 
-#define GASLIMIT  20
-
+#define GASLIMIT      20
+#define IDLE_THROTTLE 30
 
 
 
