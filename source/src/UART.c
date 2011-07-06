@@ -20,6 +20,7 @@ extern union pulsw pulswidth;
 extern float K_p, K_i, K_d;
 extern float K_pY, K_iY, K_dY;
 extern uint8_t idle_throttle;
+extern uint16_t gyro_reverse;
 
 char gui_SENSOR[13];
 char gui_PARA[33];
@@ -113,7 +114,7 @@ void GUI_com()
 
   if(gui_RESET)
   {
-    //reset device
+    //reset device                                        //not implemented as the gui doesn't seem to use this command anyway
     gui_RESET = 0; //reset flag
     //QuadC_LEDToggle(LED2);
 
@@ -129,7 +130,20 @@ void GUI_com()
     K_iY = (float)gui_PARA[12] / 255;
     idle_throttle = gui_PARA[20];
     low_bat = (uint16_t)gui_PARA[21] * 11.09;
-
+    if(gui_PARA[1])
+      gyro_reverse |= 0x01;
+    else
+      gyro_reverse &= ~0x01;
+    if(gui_PARA[2])
+      gyro_reverse |= 0x02;
+    else
+      gyro_reverse &= ~0x02;
+    if(gui_PARA[3])
+      gyro_reverse |= 0x04;
+    else
+      gyro_reverse &= ~0x04;
+    
+    //write new data to emulated eeprom
     FLASH_Unlock();
     EE_WriteVariable(p_gain, (uint16_t)gui_PARA[6]);
     EE_WriteVariable(i_gain, (uint16_t)gui_PARA[7]);
@@ -138,6 +152,7 @@ void GUI_com()
     EE_WriteVariable(i_gainy, (uint16_t)gui_PARA[12]);
     EE_WriteVariable(lowbat, (uint16_t)gui_PARA[21]);
     EE_WriteVariable(idlethrottle, (uint16_t)gui_PARA[20]);
+    EE_WriteVariable(gyroreverse, (uint16_t)gyro_reverse);
     FLASH_Lock();
 
     gui_rx_finished = 0;                                                  //reset flag
@@ -151,9 +166,9 @@ void GUI_com()
     //send parameter to pc
 
     gui_PARA[0]  = 1;                                 //motors enable                 - not implemented
-    gui_PARA[1]  = 0;                                 //gyro_roll_dir                 - not implemented
-    gui_PARA[2]  = 0;                                 //gyro_pitch_dir                - not implemented
-    gui_PARA[3]  = 0;                                 //gyro_yaw_dir                  - not implemented
+    gui_PARA[1]  = (uint8_t)(gyro_reverse & 0x01);   //gyro_roll_dir                 
+    gui_PARA[2]  = (uint8_t)(gyro_reverse & 0x02);   //gyro_pitch_dir                
+    gui_PARA[3]  = (uint8_t)(gyro_reverse & 0x04);   //gyro_yaw_dir                  
     gui_PARA[4]  = 0;                                 //acc_x_dir                     - not implemented
     gui_PARA[5]  = 0;                                 //acc_y_dir                     - not implemented
     gui_PARA[6]  = (uint8_t)(K_p * 255);              //P_Gain
@@ -170,8 +185,8 @@ void GUI_com()
     gui_PARA[17] = 0;                                 //expo                          - not implemented
     gui_PARA[18] = 0;                                 //expo                          - not implemented
     gui_PARA[19] = 0;                                 //expo                          - not implemented
-    gui_PARA[20] = idle_throttle;                                //minimum throttle  
-    gui_PARA[21] = (uint8_t)((uint16_t)low_bat / 11.09);         //voltage warning    
+    gui_PARA[20] = idle_throttle;                     //minimum throttle  
+    gui_PARA[21] = (uint8_t)((low_bat + 5) / 11.09);        //voltage warning    
     gui_PARA[22] = 0;                                 //acc_x offset                  - not implemented
     gui_PARA[23] = 0;                                 //acc_y offset                  - not implemented
     gui_PARA[24] = 4;                                 //throttle channel              - hardcoded
@@ -184,8 +199,8 @@ void GUI_com()
     gui_PARA[31] = 0;                                 //n/a
     gui_PARA[32] = 0;                                 //n/a
 
-    strcpy(gui_packet, "s#p!\r\n");                   //tell pc that there a parameter about to be sent
-    for(i = 0; i < 33; i++)
+    strcpy(gui_packet, "s#p!\r\n");                   //tells pc that there a parameter about to be sent
+    for(i = 0; i < 33; i++)                           //append parameters to gui_packet
     {
       gui_packet[i+6] = gui_PARA[i];
     }
@@ -219,14 +234,14 @@ void GUI_com()
     gui_SENSOR[12] = (uint8_t)((vadc / 5.44) - 256);
 
 
-    strcpy(gui_packet, "ss!\r\n");
+    strcpy(gui_packet, "ss!\r\n");                    //tells pc that there a sensor data about to be sent
     for(i = 0; i < 13; i++)
     {
       gui_packet[i+5] = gui_SENSOR[i];
     }
     TxBuf = gui_packet;
     NoofByte = 18;
-    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);                   //trigger UART transmission
+    USART_ITConfig(USART1, USART_IT_TXE, ENABLE);     //trigger UART transmission
 
   }
 }
@@ -244,7 +259,6 @@ void GUI_receive(char c)
 {
   static uint8_t rx_count = 0;
   uint8_t i;
-  //static char msg[20];
 
   msg[rx_count] = c;
   rx_count++;

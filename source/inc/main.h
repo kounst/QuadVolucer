@@ -43,6 +43,7 @@ void TimingDelay_Decrement  (void);
 #define d_gainy         0x1234
 #define lowbat          0x4321
 #define idlethrottle    0x1122
+#define gyroreverse     0xAAAA
 
 
 

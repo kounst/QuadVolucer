@@ -15,9 +15,6 @@
 #include "mixer.h"
 #include "stdio.h"
 
-#define TxBufferSize   (countof(TxBuffer) - 1)
-char TxBuffer[] = "Buffer has never been written!                                                                                                                                                                                    ";
-
 
 u8 rcdsl_battery;
 u8 rcdsl_allocation;
@@ -29,21 +26,22 @@ struct props gas = {0,0,0,0};
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t buf[10];
+uint8_t buf[10];                                    //I2C_buffer;
 int16_t GyroX, GyroY, GyroZ, Temp;
 int16_t GyroXNeutral, GyroYNeutral, GyroZNeutral;
-unsigned char who_am_i;
-uint16_t tick = 0;
-uint8_t NbrOfDataToTransfer = TxBufferSize;
-uint16_t address = 0;
+volatile uint16_t gyro_reverse;                     //bit 0: GyroX, bit 1: GyroY, bit 2; GyroZ
+//unsigned char who_am_i;
+uint16_t tick = 0;                                  //syncs main loop with 1ms Systick
+//uint16_t address = 0;
 volatile uint16_t vadc = 10000;
 volatile uint16_t low_bat = 0;
 extern uint8_t idle_throttle;
 uint8_t lowbat_flag = 0;
-
+extern float K_p, K_i, K_d;                         //PID gain values for pitch & roll
+extern float K_pY, K_iY, K_dY;                      //PID gain values for yaw
 
 /* Virtual address defined by the user: 0xFFFF value is prohibited */
-volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4, p_gain, i_gain, d_gain, p_gainy, i_gainy, d_gainy, lowbat, idlethrottle};
+volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4, p_gain, i_gain, d_gain, p_gainy, i_gainy, d_gainy, lowbat, idlethrottle, gyroreverse};
                                                                                                   
 static __IO uint32_t TimingDelay;                                                                  
                                                                                                   
@@ -63,12 +61,8 @@ void CalibrateRC(void);
 void CalibrateGyro(void);
 void GUI_com(void);
 
-//extern union channels set; //temporary
-//extern struct pid level;
-//extern struct pdyaw yaw;
 
-extern float K_p, K_i, K_d;
-extern float K_pY, K_iY, K_dY;
+
 
 /* Private functions ---------------------------------------------------------*/
 
@@ -97,81 +91,81 @@ int main(void)
   FLASH_Lock();
   /*----------------------------------------------------------------------------*/
 
-  readeeprom();   //read RC channels neutral calibration data
+  readeeprom();                                                 //reads parameters from eeprom
 
   /* SysTick Configuration */
   SysTick_Configuration();
 
-  /* UART configuration for debugging */
+  /* UART configuration for gui interface */
   USART_Configuration();
 
+  /* UART configuration for ACT DSL receiver interface */
   USART_RC_Config();
 
-  /* I2C configuration for EMCs*/
+  /* I2C configuration for EMCs */
   I2C2_Configuration();
 
-  /* Configuration of ADC1 for voltage measurement*/
+  /* Configuration of ADC1 for voltage measurement (batterie warning)*/
   ADC1_Configuration();
   
-  /* TIM3_Configuration */
-  TIM3_Configuration(); 
+  /* TIM3_Configuration for gerneration of 2kHz Signal for buzzer */
+  TIM3_Configuration();                                         
    
   /* I2C configuration for Gyro*/
   I2C_Configuration();
 
-  if((RCC_GetFlagStatus(RCC_FLAG_PORRST) == SET))               //calibrate only if there was a powerdown reset
+  if((RCC_GetFlagStatus(RCC_FLAG_PORRST) == SET))                     //calibrate only if there was a powerdown reset
   {
-    RCC_ClearFlag();                                            //clears all reset flags
+    RCC_ClearFlag();                                                  //clears all reset flags
     Delay(3000);
   
     if((pulswidth.puls.pw4 < 8700) && (pulswidth.puls.pw3 < 8700))    //stick position: lower left corner
     { 
       QuadC_LEDOn(LED2);
-      while(pulswidth.puls.pw3 < 9000);
-      Delay(100);
+      while(pulswidth.puls.pw3 < 9000);                               //while stick in lower left corner
+      Delay(200);
       QuadC_LEDOff(LED2);
       CalibrateRC();
     }
   
-    CalibrateGyro();
+    CalibrateGyro();                                                  //determines gyros zero angular velocity values
   }
   else
   {
-    QuadC_LEDOn(LED2);                                          //turn on red LED if unknown resed occured
+    QuadC_LEDOn(LED2);                                                //turn on red LED if unknown reset occured
   }
 
-  QuadC_LEDOn(LED1);     //boot process finished
+  QuadC_LEDOn(LED1);                                                  //boot process finished
 
   while (1)
   {
-    if(tick > 4)
+    if(tick > 4)                                                      //once every 4ms
     {
       tick = 0;
 
-      readmem(29,buf,6);
+      readmem(29,buf,6);                                              //read gyro data
       GyroX = (buf[0] << 8) | buf[1];
       GyroY = (buf[2] << 8) | buf[3];
       GyroZ = (buf[4] << 8) | buf[5];
 
-      GyroX -= GyroXNeutral;
+      GyroX -= GyroXNeutral;                                          
       GyroY -= GyroYNeutral;
       GyroZ -= GyroZNeutral;
 
-      mixer();
+      if(gyro_reverse & 0x01)                                         //if coresoponding bit is set - invert gyro value
+        GyroX = (-1) * GyroX;
+      if(gyro_reverse & 0x02)
+        GyroY = (-1) * GyroY;
+      if(gyro_reverse & 0x04)
+        GyroZ = (-1) * GyroZ;
 
-      //sprintf(TxBuffer,"PW1:%5d; PW2:%5d; PW3:%5d; PW4:%5d; \r\n",neutral.rotate.roll, neutral.rotate.pitch, neutral.rotate.yaw, neutral.rotate.throttle);
-      //sprintf(TxBuffer,"GyroX:%5d; GyroY:%5d; GyroZ:%5d; GyroXNeutral:%5d; GyroYNeutral:%5d; GyroZNeutral:%5d \r\n", GyroX,GyroY,GyroZ, GyroXNeutral, GyroYNeutral, GyroZNeutral);
-      //sprintf(TxBuffer,"Temperatur:%5d; GyroX:%5d; GyroY:%5d; GyroZ:%5d; pulswidth: pw1:%5d pw2:%5d pw3:%5d pw4:%5d pw5:%5d pw6:%5d pw7:%5d pw8:%5d \r\n",Temp, GyroX,GyroY,GyroZ, pulswidth.pw[0],pulswidth.pw[1],pulswidth.pw[2],pulswidth.pw[3],pulswidth.pw[4],pulswidth.pw[5],pulswidth.pw[6],pulswidth.pw[7]);
-      //sprintf(TxBuffer,"Gas1: %5d; Yaw: %5d; Gyro: %5d; levelsign[x]: %5d; levelerror[x] %5d; setlevel[x] %5d \r\n",gas.front, set.rotate.yaw, GyroZ,yaw.yawsign,yaw.yawerror, set.level[2]);
-      //sprintf(TxBuffer,"Gas.front: %5d; Gas.rear: %5d; Gas.left: %5d; Gas.right: %5d;\r\n",gas.front, gas.rear, gas.left, gas.right);
-      //sprintf(TxBuffer,"K_p:%5f; K_i:%5f; K_d:%5f;\r\n",K_p, K_i, K_d);
-      //USART_ITConfig(USART1, USART_IT_TXE, ENABLE);
+      mixer();                                                        //angular volocity control and mixing of channels
 
-      GUI_com();
+      GUI_com();                                                      //handels communication with gui
 
-      if(vadc < low_bat)
+      if(vadc < low_bat)                                              //checks batterie voltage
       {
-        lowbat_flag = 1;
+        lowbat_flag = 1;                                              //there is no reseting this flag
       }
     }   
   }
@@ -343,58 +337,62 @@ void CalibrateGyro()
 void readeeprom(void)
 {
   uint16_t temp;
-  if(!EE_ReadVariable(neutral_pw1, (uint16_t *)&neutral.rotate.roll))        //if variable exists
-    ;
-  else                                                           //else set to default
+  if(!EE_ReadVariable(neutral_pw1, (uint16_t *)&neutral.rotate.roll))       //if variable exists
+    ;                                                                       
+  else                                                                      //else set to default
     neutral.rotate.roll = NEUTRAL_ROTATE_ROLL;                                    
 
-  if(!EE_ReadVariable(neutral_pw2, (uint16_t *)&neutral.rotate.pitch))       //if variable exists
+  if(!EE_ReadVariable(neutral_pw2, (uint16_t *)&neutral.rotate.pitch))      //if variable exists
     ;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     neutral.rotate.pitch = NEUTRAL_ROTATE_PITCH;
 
   if(!EE_ReadVariable(neutral_pw3, (uint16_t *)&neutral.rotate.yaw))        //if variable exists
     ;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     neutral.rotate.yaw = NEUTRAL_ROTATE_YAW;
 
-  if(!EE_ReadVariable(neutral_pw4, (uint16_t *)&neutral.rotate.throttle))     //if variable exists
+  if(!EE_ReadVariable(neutral_pw4, (uint16_t *)&neutral.rotate.throttle))   //if variable exists
     ;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     neutral.rotate.throttle = NEUTRAL_ROTATE_THROTTLE;
 
-  if(!EE_ReadVariable(p_gain, (uint16_t *)&temp))     //if variable exists
+  if(!EE_ReadVariable(p_gain, (uint16_t *)&temp))                           //if variable exists
     K_p = (float)temp / 255;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     K_p = P_GAIN;
-  if(!EE_ReadVariable(i_gain, (uint16_t *)&temp))     //if variable exists
+  if(!EE_ReadVariable(i_gain, (uint16_t *)&temp))                           //if variable exists
     K_i = (float)temp / 255;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     K_i = I_GAIN;
-  if(!EE_ReadVariable(d_gain, (uint16_t *)&temp))     //if variable exists
+  if(!EE_ReadVariable(d_gain, (uint16_t *)&temp))                           //if variable exists
     K_d = (float)temp / 255;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     K_d = D_GAIN;
-  if(!EE_ReadVariable(p_gainy, (uint16_t *)&temp))     //if variable exists
+  if(!EE_ReadVariable(p_gainy, (uint16_t *)&temp))                          //if variable exists
     K_pY = (float)temp / 255;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     K_pY = P_GAINY;
-  if(!EE_ReadVariable(i_gainy, (uint16_t *)&temp))     //if variable exists
+  if(!EE_ReadVariable(i_gainy, (uint16_t *)&temp))                          //if variable exists
     K_iY = (float)temp / 255;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     K_iY = I_GAINY;
-  if(!EE_ReadVariable(d_gainy, (uint16_t *)&temp))     //if variable exists
+  if(!EE_ReadVariable(d_gainy, (uint16_t *)&temp))                          //if variable exists
     K_dY = (float)temp / 255;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     K_dY = D_GAINY;
-  if(!EE_ReadVariable(lowbat, (uint16_t *)&temp))     //if variable exists
+  if(!EE_ReadVariable(lowbat, (uint16_t *)&temp))                           //if variable exists
     low_bat = (uint16_t)temp * 11.09;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     low_bat = LOWBAT;
-  if(!EE_ReadVariable(idlethrottle, (uint16_t *)&idle_throttle))     //if variable exists
+  if(!EE_ReadVariable(idlethrottle, (uint16_t *)&idle_throttle))            //if variable exists
     ;
-  else                                                           //else set to default
+  else                                                                      //else set to default
     idle_throttle = IDLE_THROTTLE;
+  if(!EE_ReadVariable(gyroreverse, (uint16_t *)&gyro_reverse))              //if variable exists
+    ;
+  else                                                                      //else set to default
+    gyro_reverse = 0x00;
 
 }
 

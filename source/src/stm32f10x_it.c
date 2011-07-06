@@ -427,6 +427,8 @@ void TIM3_IRQHandler(void)
 
   TIM_ClearITPendingBit(TIM3, TIM_IT_CC1);
 
+  /* This cannot be done in hardware because of an error on the MC -> see errata */
+
   if(lowbat_flag)
   {
     QuadC_LEDToggle(SUMMER);
@@ -485,7 +487,7 @@ void USART1_IRQHandler(void)
     USART_SendData(USART1, TxBuf[count]);                    
     count++;
 
-    if(count == NoofByte)
+    if(count == NoofByte)                                  
     {
       /* Disable the USART1 Transmit interrupt */
       USART_ITConfig(USART1, USART_IT_TXE, DISABLE);
