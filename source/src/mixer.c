@@ -69,10 +69,9 @@ void mixer()
   levelcontroller(GyroY, 1);
   yawcontroller(GyroZ);
 
-  throttle = 0.9 * throttle + (1 - 0.9) * pulswidth.puls.pw4;       //used for mode selection only
-  modeswitch = 0.9  * modeswitch + (1 - 0.9) * pulswidth.puls.pw6;  //used for mode selection only
-  //throttle = pulswidth.puls.pw4;
-  //modeswitch = pulswidth.puls.pw6;
+  throttle = 0.95 * throttle + (1 - 0.95) * pulswidth.puls.pw4;       //used for mode selection only
+  modeswitch = 0.95  * modeswitch + (1 - 0.95) * pulswidth.puls.pw6;  //used for mode selection only
+
 
 
 	//FSM Power modes: off, standby (props rotating very slowly), flight (normal,full operation)
@@ -211,114 +210,7 @@ void mode_standby()
 
 void mode_flight()
 {
-//  //FRONT
-//	temp = (set.rotate.throttle - level.levelsign[0] + yaw.yawsign)/24;
-//	if(gas.front < 30)
-//		gas.front = 30;
-//	else
-//	{
-//		if(temp > 255)
-//			//gas.front = 255;
-//      temp = 255;
-//    
-//    if(temp > gas.front)
-//    {
-//      if(temp > gas.front + 10)
-//        gas.front += 10;
-//      else
-//        gas.front++;
-//    }
-//    else
-//    {
-//      if(temp < gas.front - 10)
-//        gas.front -= 10;
-//      else
-//        gas.front--;
-//    }
-//    
-//	}
-//
-//	//REAR
-//	temp = (set.rotate.throttle + level.levelsign[0] + yaw.yawsign )/24;
-//	if(gas.rear < 30)
-//		gas.rear = 30;
-//	else
-//	{
-//		if(temp > 255)
-//			//gas.front = 255;
-//      temp = 255;
-//    
-//    if(temp > gas.rear)
-//    {
-//      if(temp > gas.rear + 10)
-//        gas.rear += 10;
-//      else
-//        gas.rear++;
-//    }
-//    else
-//    {
-//      if(temp < gas.rear - 10)
-//        gas.rear -= 10;
-//      else
-//        gas.rear--;
-//    }
-//    
-//	}
-//
-//	//LEFT
-//	temp = (set.rotate.throttle - level.levelsign[1] - yaw.yawsign )/24;
-//	if(gas.left < 30)
-//		gas.left = 30;
-//	else
-//	{
-//		if(temp > 255)
-//			//gas.front = 255;
-//      temp = 255;
-//    
-//    if(temp > gas.left)
-//    {
-//      if(temp > gas.left + 10)
-//        gas.left += 10;
-//      else
-//        gas.left++;
-//    }
-//    else
-//    {
-//      if(temp < gas.left - 10)
-//        gas.left -= 10;
-//      else
-//        gas.left--;
-//    }
-//    
-//	}
-//
-//	//RIGHT
-//	temp = (set.rotate.throttle + level.levelsign[1] - yaw.yawsign )/24;
-//	if(gas.right < 30)
-//		gas.right = 30;
-//	else
-//	{
-//		if(temp > 255)
-//			//gas.front = 255;
-//      temp = 255;
-//    
-//    if(temp > gas.right)
-//    {
-//      if(temp > gas.right + 10)
-//        gas.right += 10;
-//      else
-//        gas.right++;
-//    }
-//    else
-//    {
-//      if(temp < gas.right - 10)
-//        gas.right -= 10;
-//      else
-//        gas.right--;
-//    } 
-//	}
-
- //FRONT
+  //FRONT
 	temp = (set.rotate.throttle - level.levelsign[0] + yaw.yawsign)/24;
   
   temp = limitStep(gas.front, temp);

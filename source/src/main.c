@@ -165,7 +165,7 @@ int main(void)
 
       if(vadc < low_bat)                                              //checks batterie voltage
       {
-        lowbat_flag = 1;                                              //there is no reseting this flag
+        lowbat_flag = 1;                                              //there is no clearing this flag
       }
     }   
   }

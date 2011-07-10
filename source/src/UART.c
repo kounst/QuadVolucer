@@ -199,7 +199,7 @@ void GUI_com()
     gui_PARA[31] = 0;                                 //n/a
     gui_PARA[32] = 0;                                 //n/a
 
-    strcpy(gui_packet, "s#p!\r\n");                   //tells pc that there a parameter about to be sent
+    strcpy(gui_packet, "s#p!\r\n");                   //tells pc that there are parameter about to be sent
     for(i = 0; i < 33; i++)                           //append parameters to gui_packet
     {
       gui_packet[i+6] = gui_PARA[i];
