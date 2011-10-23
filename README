@@ -11,9 +11,10 @@ To archive this no ACCs are needed. There is a footprint for a 3-axis ACC on the
 canBLC is a motor controller for BLDC motors. It is meant to be used with multicopters like the QuadVolucer. As an interface it will support I2C, PWM and of cause high speed CAN.
 
 	status:	- Hardware design is finished 
-		- Software is finished (only CAN support)
+		- Software basic features working (only CAN support)
+		- current fault protection in progress
 
-	todo:	- assemble PCB
+	todo:	- implement current fault protection
 		- extensive testing
 		- implementation of PWM and I2C interface.
 		- testing on the QuadVolucer :-)
