@@ -14,6 +14,7 @@
 #include "I2C.h"
 #include "mixer.h"
 #include "stdio.h"
+#include "CAN.h"
 
 
 u8 rcdsl_battery;
@@ -44,6 +45,7 @@ extern float K_pY, K_iY, K_dY;                      //PID gain values for yaw
 volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4, p_gain, i_gain, d_gain, p_gainy, i_gainy, d_gainy, lowbat, idlethrottle, gyroreverse};
                                                                                                   
 static __IO uint32_t TimingDelay;                                                                  
+extern CanTxMsg TxMessage;
                                                                                                   
                                                                                                   
 /* Private function prototypes -----------------------------------------------*/                 
@@ -102,8 +104,13 @@ int main(void)
   /* UART configuration for ACT DSL receiver interface */
   USART_RC_Config();
 
+#ifdef CAN_blc
+  /* CAN configuration for EMCs */
+  CAN_Configuration();
+#else
   /* I2C configuration for EMCs */
   I2C2_Configuration();
+#endif
 
   /* Configuration of ADC1 for voltage measurement (batterie warning)*/
   ADC1_Configuration();
@@ -227,7 +234,7 @@ void RCC_Configuration(void)
   //RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
 
   /* CAN1 Periph clock enable */
-  //RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
+  RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
 }
 
 
@@ -418,12 +425,14 @@ void NVIC_Configuration(void)
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 
+#ifndef CAN_blc
     /* Configure and enable I2C1 event interrupt -------------------------------*/
   NVIC_InitStructure.NVIC_IRQChannel = I2C2_EV_IRQn;
   NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
+#endif
 
   /* Enable the TIM3 gloabal interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
@@ -455,12 +464,14 @@ void NVIC_Configuration(void)
 //  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
 //  NVIC_Init(&NVIC_InitStructure);
 
+#ifdef CAN_blc
   /* Enable CAN1 RX interrupt */ 
-//  NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
-//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
-//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//  NVIC_Init(&NVIC_InitStructure);
+  NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
+#endif
 
   /* Enable the RTC Interrupt */
 //  NVIC_InitStructure.NVIC_IRQChannel = RTC_IRQn;

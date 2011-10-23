@@ -40,6 +40,8 @@ extern uint8_t NoofByte;
 extern uint16_t vadc;
 extern uint8_t lowbat_flag;
 extern uint8_t *TxBuf;
+extern CanTxMsg TxMessage;
+extern CanRxMsg RxConfigMessage;
 
 
 /******************************************************************************/
@@ -138,14 +140,26 @@ void SysTick_Handler(void)
   if(slave > 4)                //number of motors
 	{
     slave = 0;
+
+    #ifndef CAN_blc
     I2C2_Configuration();
+    #endif
 	}
   else
   {
+    #ifdef CAN_blc
+    TxMessage.Data[0] = gas.front;
+    TxMessage.Data[1] = gas.right;
+    TxMessage.Data[2] = gas.rear;
+    TxMessage.Data[3] = gas.left;
+    CAN_Transmit(CAN1, &TxMessage);
+
+    #else
     I2C_ClearFlag(I2C2, I2C_FLAG_AF | I2C_FLAG_ARLO | I2C_FLAG_BERR);
     I2C_ClearITPendingBit(I2C2, I2C_IT_ARLO | I2C_IT_BERR | I2C_IT_TIMEOUT | I2C_IT_AF | I2C_IT_ADD10 | I2C_IT_SB | I2C_IT_ADDR);
     I2C_ITConfig(I2C2, I2C_IT_EVT, ENABLE);
     I2C_GenerateSTART(I2C2, ENABLE);    //triggers I2C transmission to EMCs
+    #endif
   }
 
   tick++;
@@ -448,6 +462,7 @@ void TIM3_IRQHandler(void)
   */
 void USB_LP_CAN1_RX0_IRQHandler(void)
 {
+  CAN_Receive(CAN1, CAN_FIFO0, &RxConfigMessage);
 }
 
 

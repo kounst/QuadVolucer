@@ -120,7 +120,20 @@ void GPIO_Configuration(void)
   GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
   GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_OD;
   GPIO_Init(GPIOB, &GPIO_InitStructure);
-//
+
+  /* Configure CAN pin: RX */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IPU;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+  
+  /* Configure CAN pin: TX */
+  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_9;
+  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF_PP;
+  GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+  GPIO_Init(GPIOB, &GPIO_InitStructure);
+
+  GPIO_PinRemapConfig(GPIO_Remap1_CAN1 , ENABLE);
+
 //  /* Configuration Current pin PA6 */
 //  GPIO_InitStructure.GPIO_Pin = GPIO_Pin_6;
 //  GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AIN;

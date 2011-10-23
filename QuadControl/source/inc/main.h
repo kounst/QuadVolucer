@@ -14,6 +14,7 @@ void TimingDelay_Decrement  (void);
 #define countof(a)   (sizeof(a) / sizeof(*(a)))
 
 #define LOWBAT  1966          //9V  1V == 218,4905
+#define CAN_blc
 
 //if there is no stored value in the eeprom this will be used-----
 #define NEUTRAL_ROTATE_ROLL     11059               
