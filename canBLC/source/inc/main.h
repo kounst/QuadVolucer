@@ -16,6 +16,11 @@
 
 #define CURRENTLIMIT 1000
 
+#define flashadress_ADDRESS 0x1000
+#define flashadress_MINPWM  0x1001
+#define flashadress_MAXPWM  0x1002
+
+
 
 
 void Delay                  (__IO uint32_t nTime);

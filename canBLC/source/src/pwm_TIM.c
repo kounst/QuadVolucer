@@ -77,9 +77,9 @@ void pwm_TIM_Configuration(void)
   TIM_CCPreloadControl(TIM1, ENABLE);
 
   //TIM_SelectMasterSlaveMode(TIM1, TIM_MasterSlaveMode_Enable); 
-  TIM_SelectOutputTrigger(TIM1, TIM_TRGOSource_Update);
+  //TIM_SelectOutputTrigger(TIM1, TIM_TRGOSource_OC1);
 
-  TIM_ITConfig(TIM1, TIM_IT_COM | TIM_IT_CC4 | TIM_IT_Update, ENABLE);
+  TIM_ITConfig(TIM1, TIM_IT_COM | TIM_IT_CC4 | TIM_IT_CC1, ENABLE);
   //TIM_ITConfig(TIM1, TIM_IT_COM, ENABLE);
 
   /* TIM1 counter enable */

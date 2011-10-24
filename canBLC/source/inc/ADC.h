@@ -6,9 +6,9 @@
 
 void  Com_ADC_Configuration (void);
 void ADC_Poti_Configuration(void);
-void ADC_Voltage_Configuration(void);
-void ADC_Current_Configuration_RMS(void);
-void ADC_Current_Configuration_noRMS(void);
+void ADC_Current_Configuration(void);
+
+
 
 
 

@@ -344,7 +344,7 @@
             <uThumb>0</uThumb>
             <VariousControls>
               <MiscControls></MiscControls>
-              <Define>USE_STDPERIPH_DRIVER, STM32F10X_LD</Define>
+              <Define>USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
               <IncludePath>.\inc;..\STM32F10x_StdPeriph_Lib_V3.2.0\Libraries\CMSIS\CM3\CoreSupport;..\STM32F10x_StdPeriph_Lib_V3.2.0\Libraries\CMSIS\CM3\DeviceSupport\ST\STM32F10x;..\STM32F10x_StdPeriph_Lib_V3.2.0\Libraries\STM32F10x_StdPeriph_Driver\inc</IncludePath>
             </VariousControls>

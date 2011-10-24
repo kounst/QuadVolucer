@@ -21,6 +21,7 @@ extern uint8_t  newConfig;
 extern uint8_t  angle;
 uint8_t         startmode = 0;
 
+uint32_t flashADDRESS = 0x8000000;
 
 void CAN_Configuration(void)
 {
@@ -85,7 +86,13 @@ uint8_t ConfigMessageOff(void)
 
       FLASH_Unlock();
 
-     //write data to flash!!
+      
+
+
+//      EE_WriteVariable(flashaddress,  ADDRESS);               //write address to flash
+//      EE_WriteVariable(flashminpwm,   MINPWM);                //write minpwm to flash
+//      EE_WriteVariable(flashmaxpwm,   MAXPWM);                //write maxpwm to flash
+//      EE_WriteVariable(flashangle,    ANGLE);                 //write angle to flash
 
       FLASH_Lock();
 
@@ -127,7 +134,11 @@ uint8_t ConfigMessageOff(void)
       {
         FLASH_Unlock();
   
-       //write data to flash!!
+//        EE_WriteVariable(flashaddress,  address);               //write address to flash
+//        EE_WriteVariable(flashminpwm,   minpwm);                //write minpwm to flash
+//        EE_WriteVariable(flashmaxpwm,   maxpwm);                //write maxpwm to flash
+//        EE_WriteVariable(flashangle,    angle);                 //write angle to flash
+
   
         FLASH_Lock();
 

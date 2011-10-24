@@ -21,7 +21,7 @@
 
 
 
-#define ADC1_DR_Address    ((uint32_t)0x4001244C)
+
 
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
@@ -36,6 +36,8 @@ uint16_t minpwm = MINPWM;
 uint16_t maxpwm = MAXPWM;
 uint16_t address = 0;
 uint32_t idle_song = IDLE;
+extern uint32_t flashADDRESS;
+ 
 
 extern uint16_t slopecount;
 
@@ -58,7 +60,7 @@ static __IO uint32_t TimingDelay;
 void RCC_Configuration(void);
 void SysTick_Configuration(void);
 void NVIC_Configuration(void);
-void readeeprom(void);
+void readFLASH(void);
 
 
 
@@ -93,7 +95,10 @@ int main(void)
   Com_TIM_Configuration();
   
   /* TIM_Configuration PWM*/
-  pwm_TIM_Configuration();  
+  pwm_TIM_Configuration();
+  
+  
+  //readFLASH();  
 
   /* CAN1 Configuration */
   CAN_Configuration();
@@ -108,8 +113,8 @@ int main(void)
 
   while (1)
   {
-    if(current > 2000)
-      op_mode = stop;
+//    if(current > 2000)
+//      op_mode = stop;
     switch (op_mode)
     {
       case off:
@@ -198,6 +203,20 @@ void RCC_Configuration(void)
   
   /* CAN1 Periph clock enable */
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
+}
+
+
+/* reads stored parameters from the emulated eeprom(flash) */
+void readFLASH(void)
+{
+  if((*(__IO uint16_t*)flashADDRESS == 1) || (*(__IO uint16_t*)flashADDRESS == 2) || (*(__IO uint16_t*)flashADDRESS == 3))
+  {
+    address = *(__IO uint16_t*)flashADDRESS;
+  }
+  else
+  {
+    address = ADDRESS;
+  }
 }
 
 
@@ -306,6 +325,9 @@ void NVIC_Configuration(void)
   /* SysTick Priority */
  NVIC_SetPriority(SysTick_IRQn, 4);
 }
+
+
+
 
 #ifdef  USE_FULL_ASSERT
 

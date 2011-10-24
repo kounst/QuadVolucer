@@ -45,6 +45,16 @@ CanTxMsg TxMessage;
 extern uint32_t idle_song;
 
 
+enum mode
+{
+  off,
+  start,
+  stop,
+  running
+};
+extern enum mode op_mode;
+
+
 
 /******************************************************************************/
 /*            Cortex-M3 Processor Exceptions Handlers                         */
@@ -140,14 +150,36 @@ void SysTick_Handler(void)
 {
   static uint8_t prescaler = CANLOGprescaler;
 
+  if(op_mode == off)
+  {
+    current = 0;
+  }
+  else
+  {
+    current = 0.95 * current + ADC_GetConversionValue(ADC2);
+  }
+  if(current > 12000 && maxpwm > 100)
+  {
+    maxpwm -= 100;
+    setPW(speed);
+  }
+  if(current < 8000 && maxpwm < 1024)
+  {
+    maxpwm += 100;
+    setPW(speed);
+  }
+
   if(canlog)
   {
     if(prescaler == 0)
     {
       prescaler = 100;
       //current =  ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_1);
+      //current = 0.95 * current + ADC_GetConversionValue(ADC2);
       TxMessage.Data[0] = (current >> 8);
       TxMessage.Data[1] =  current;
+      TxMessage.Data[2] =  maxpwm>>8;
+      TxMessage.Data[3] =  maxpwm;
       TxMessage.Data[4] = (rpm>>8);              // RPM high byte
       TxMessage.Data[5] = rpm;                   // RPM low byte
       CAN_Transmit(CAN1, &TxMessage);
@@ -180,6 +212,7 @@ void SysTick_Handler(void)
   */
 void ADC1_2_IRQHandler(void)
 {
+  uint16_t new_current;
   if( ADC_GetITStatus(ADC1, ADC_IT_JEOC) != RESET)
   {
     /* Clear ADC1 JEOC pending interrupt bit */
@@ -187,15 +220,19 @@ void ADC1_2_IRQHandler(void)
   
     next_commutation(edge); //checks if BEMF zero crossing has occured
   }
-  if( ADC_GetITStatus(ADC2, ADC_IT_JEOC) != RESET)
-  {
-    /* Clear ADC1 JEOC pending interrupt bit */
-    ADC_ClearITPendingBit(ADC2, ADC_IT_JEOC);
 
-    current = 0.95 * current + ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_1);
+  if( ADC_GetITStatus(ADC2, ADC_IT_EOC) != RESET)
+  {
+    /* Clear ADC1 EOC pending interrupt bit */
+    ADC_ClearITPendingBit(ADC2, ADC_IT_EOC);
+
+    //current = ADC_GetConversionValue(ADC2);
+//    if(current < new_current)
+//      current++;
+//    else
+//      current--;
 
     //GPIO_WriteBit(GPIOA, GPIO_Pin_5, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_5)));
-    GPIO_WriteBit(GPIOA, GPIO_Pin_5, 1);
   }
 }
 
@@ -234,10 +271,18 @@ void TIM1_TRG_COM_IRQHandler(void)
   */
 void TIM1_CC_IRQHandler(void)
 {
-  /* Clear TIM1 CC pending bit */
-  TIM_ClearITPendingBit(TIM1, TIM_IT_CC4);
-  curr_count = TIM_GetCounter(TIM2);
-
+  if (TIM_GetITStatus(TIM1, TIM_IT_CC4) != RESET)
+  {
+    /* Clear TIM1 CC pending bit */
+    TIM_ClearITPendingBit(TIM1, TIM_IT_CC4);
+    curr_count = TIM_GetCounter(TIM2);
+  }
+  if (TIM_GetITStatus(TIM1, TIM_IT_CC1) != RESET)
+  {
+    /* Clear TIM1 CC pending bit */
+    TIM_ClearITPendingBit(TIM1, TIM_IT_CC1);
+    //GPIO_WriteBit(GPIOA, GPIO_Pin_5, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_5)));
+  }
 }
 
 
@@ -245,7 +290,7 @@ void TIM1_UP_IRQHandler(void)
 {
   TIM_ClearITPendingBit(TIM1, TIM_IT_Update);
   //GPIO_WriteBit(GPIOA, GPIO_Pin_5, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_5)));
-  GPIO_WriteBit(GPIOA, GPIO_Pin_5, 0);
+  //GPIO_WriteBit(GPIOA, GPIO_Pin_5, 0);
 }
 
 
