@@ -18,6 +18,7 @@
 #include "stdlib.h"
 #include <math.h>
 #include "beep.h"
+#include "eeprom.h"
 
 
 
@@ -54,13 +55,17 @@ extern uint16_t angle;
 extern uint8_t startmode;
 
 
+/* Virtual address defined by the user: 0xFFFF value is prohibited */
+extern uint16_t VirtAddVarTab[NumbOfVar];
+
+
 static __IO uint32_t TimingDelay;
 
 /* Private function prototypes -----------------------------------------------*/
 void RCC_Configuration(void);
 void SysTick_Configuration(void);
 void NVIC_Configuration(void);
-void readFLASH(void);
+void readeeprom(void);
 
 
 
@@ -98,7 +103,15 @@ int main(void)
   pwm_TIM_Configuration();
   
   
-  //readFLASH();  
+  /* Unlock the Flash Program Erase controller */
+  FLASH_Unlock();
+
+  /* EEPROM Init */
+  EE_Init();
+
+  FLASH_Lock();
+
+  readeeprom();
 
   /* CAN1 Configuration */
   CAN_Configuration();
@@ -113,8 +126,6 @@ int main(void)
 
   while (1)
   {
-//    if(current > 2000)
-//      op_mode = stop;
     switch (op_mode)
     {
       case off:
@@ -207,16 +218,26 @@ void RCC_Configuration(void)
 
 
 /* reads stored parameters from the emulated eeprom(flash) */
-void readFLASH(void)
+void readeeprom(void)
 {
-  if((*(__IO uint16_t*)flashADDRESS == 1) || (*(__IO uint16_t*)flashADDRESS == 2) || (*(__IO uint16_t*)flashADDRESS == 3))
-  {
-    address = *(__IO uint16_t*)flashADDRESS;
-  }
-  else
-  {
+  if(!EE_ReadVariable(flashminpwm, &minpwm))        //if variable exists
+    ;
+  else                                              //else set to default
+    minpwm = MINPWM;                                    
+
+  if(!EE_ReadVariable(flashmaxpwm, &maxpwm))        //if variable exists
+    ;
+  else                                              //else set to default
+    maxpwm = MAXPWM;
+  if(!EE_ReadVariable(flashaddress, &address))      //if variable exists
+    ;
+  else                                              //else set to default
     address = ADDRESS;
-  }
+  if(!EE_ReadVariable(flashangle, &angle))          //if variable exists
+    ;
+  else                                              //else set to default
+    angle = ANGLE;
+  TxMessage.StdId = 0x010 | (address+1);
 }
 
 

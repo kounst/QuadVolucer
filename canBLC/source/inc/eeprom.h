@@ -35,7 +35,7 @@
 #endif
 
 /* EEPROM start address in Flash */
-#define EEPROM_START_ADDRESS    ((uint32_t)0x08010000) /* EEPROM emulation start address:
+#define EEPROM_START_ADDRESS    ((uint32_t)0x08007800) /* EEPROM emulation start address:
                                                   after 64KByte of used Flash memory */
 
 /* Pages 0 and 1 base and end addresses */
