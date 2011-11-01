@@ -56,6 +56,9 @@ void startup(uint8_t mode)
     forced_start_ramp();
   else
     forced_start_push();
+
+  setPW(400);
+  Delay(500);
 }
 
 /* forces a single commutation step relying on the BEMF to kick in immediately */
