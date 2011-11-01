@@ -150,6 +150,7 @@ void SysTick_Handler(void)
 {
   static uint8_t prescaler = CANLOGprescaler;
 
+  #ifdef current_protection
   if(op_mode == off)
   {
     current = 0;
@@ -168,6 +169,7 @@ void SysTick_Handler(void)
     maxpwm += 100;
     setPW(speed);
   }
+  #endif
 
   if(canlog)
   {
@@ -191,9 +193,9 @@ void SysTick_Handler(void)
 
   TimingDelay_Decrement();  //Decrement ms counter of Delay() function
 
-//  cantimeout--;
-//  if(!cantimeout)           //turn off motor if CAN speed frame has timed out
-//    speed = 0;
+  cantimeout--;
+  if(!cantimeout)           //turn off motor if CAN speed frame has timed out
+    speed = 0;
 
   if(idle_song-1)
     idle_song--;
@@ -212,7 +214,6 @@ void SysTick_Handler(void)
   */
 void ADC1_2_IRQHandler(void)
 {
-  uint16_t new_current;
   if( ADC_GetITStatus(ADC1, ADC_IT_JEOC) != RESET)
   {
     /* Clear ADC1 JEOC pending interrupt bit */
@@ -381,12 +382,3 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 {
 }*/
 
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
-
-/******************* (C) COPYRIGHT 2009 STMicroelectronics *****END OF FILE****/
