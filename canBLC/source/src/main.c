@@ -15,7 +15,7 @@
 #include "bemf.h"
 #include "CAN.h"
 #include <stdio.h>
-#include "stdlib.h"
+
 #include <math.h>
 #include "beep.h"
 #include "eeprom.h"
@@ -32,6 +32,7 @@ volatile uint16_t speed=0;
 volatile uint16_t current=0;
 volatile uint16_t period;
 extern uint8_t BEMF_active;
+extern uint16_t timeout;
 uint16_t rpm=0;
 uint16_t minpwm = MINPWM;
 uint16_t maxpwm = MAXPWM;
@@ -130,6 +131,7 @@ int main(void)
     {
       case off:
         ConfigMessageOff();
+
         if(speed > minpwm)
         {
           op_mode = start;
@@ -237,6 +239,10 @@ void readeeprom(void)
     ;
   else                                              //else set to default
     angle = ANGLE;
+  if(!EE_ReadVariable(flashcantimeout, &timeout))   //if variable exists
+    ;
+  else                                              //else set to default
+    timeout = TIMEOUT;
   TxMessage.StdId = 0x010 | (address+1);
 }
 
@@ -368,12 +374,3 @@ void assert_failed(uint8_t* file, uint32_t line)
   {}
 }
 #endif
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
-
-/******************* (C) COPYRIGHT 2009 STMicroelectronics *****END OF FILE****/

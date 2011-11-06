@@ -20,10 +20,11 @@ extern uint16_t maxpwm;
 extern uint16_t address;
 extern uint8_t  newConfig;
 extern uint8_t  angle;
+extern uint16_t timeout;
 uint8_t         startmode = 0;
 
 /* Virtual address defined by the user: 0xFFFF value is prohibited */
-volatile uint16_t VirtAddVarTab[NumbOfVar] = {flashminpwm, flashmaxpwm, flashaddress, flashangle};
+volatile uint16_t VirtAddVarTab[NumbOfVar] = {flashminpwm, flashmaxpwm, flashaddress, flashangle, flashcantimeout};
 
 
 void CAN_Configuration(void)
@@ -86,6 +87,7 @@ uint8_t ConfigMessageOff(void)
       minpwm  = MINPWM;
       maxpwm  = MAXPWM;
       angle   = ANGLE;
+      timeout = 100;    //set timeout to 100ms
 
       FLASH_Unlock();
 
@@ -93,6 +95,7 @@ uint8_t ConfigMessageOff(void)
       EE_WriteVariable(flashminpwm,   MINPWM);                //write minpwm to flash
       EE_WriteVariable(flashmaxpwm,   MAXPWM);                //write maxpwm to flash
       EE_WriteVariable(flashangle,    ANGLE);                 //write angle to flash
+      EE_WriteVariable(flashcantimeout, timeout);             //write timeout to flash
 
       FLASH_Lock();
 
@@ -100,7 +103,7 @@ uint8_t ConfigMessageOff(void)
     }
     else
     {
-      if((RxConfigMessage.Data[0] > 0) && (RxConfigMessage.Data[0] < 9) && (RxConfigMessage.Data[4] & 0x40))     //valid address?
+      if((RxConfigMessage.Data[0] > 0) && (RxConfigMessage.Data[0] < 9) && (RxConfigMessage.Data[7] & 0x40))     //valid address?
       {
         if(address != (RxConfigMessage.Data[0] - 1))
         {
@@ -115,7 +118,7 @@ uint8_t ConfigMessageOff(void)
         }
       }
       
-      if(RxConfigMessage.Data[1] > 0 && RxConfigMessage.Data[1] < 16)
+      if((RxConfigMessage.Data[1] > 0) && (RxConfigMessage.Data[1] < 16) && (RxConfigMessage.Data[7] & 0x20))
         angle = RxConfigMessage.Data[1];                                     //set commutation timing
     
       if(RxConfigMessage.Data[2] != 0)
@@ -127,17 +130,22 @@ uint8_t ConfigMessageOff(void)
         if(maxpwm > 1900)
           maxpwm = 1900;
       }
-      startmode = RxConfigMessage.Data[4] & 0x02;               //startmode selection bit set? push or ramp start?
-      canlog = RxConfigMessage.Data[4] & 0x01;                  //turn on/off log transmission
+
+      if(RxConfigMessage.Data[4] > 0 && RxConfigMessage.Data[7] & 16)        
+        timeout = RxConfigMessage.Data[4] * 100;                             //set cantimeout
+
+      startmode = RxConfigMessage.Data[7] & 0x02;               //startmode selection bit set? push or ramp start?
+      canlog = RxConfigMessage.Data[7] & 0x01;                  //turn on/off log transmission
     
-      if(RxConfigMessage.Data[4] & 0x80)                        //flash write bit set?
+      if(RxConfigMessage.Data[7] & 0x80)                        //flash write bit set?
       {
         FLASH_Unlock();
   
-        EE_WriteVariable(flashaddress,  address);               //write address to flash
-        EE_WriteVariable(flashminpwm,   minpwm);                //write minpwm to flash
-        EE_WriteVariable(flashmaxpwm,   maxpwm);                //write maxpwm to flash
-        EE_WriteVariable(flashangle,    angle);                 //write angle to flash
+        EE_WriteVariable(flashaddress,    address);               //write address to flash
+        EE_WriteVariable(flashminpwm,     minpwm);                //write minpwm to flash
+        EE_WriteVariable(flashmaxpwm,     maxpwm);                //write maxpwm to flash
+        EE_WriteVariable(flashangle,      angle);                 //write angle to flash
+        EE_WriteVariable(flashcantimeout, timeout);               //write timeout to flash
 
         FLASH_Lock();
 
@@ -146,9 +154,16 @@ uint8_t ConfigMessageOff(void)
         beep(700,200);
       }
 
-      if((RxConfigMessage.Data[4] & 0x1C) != 0)
+      if((!RxConfigMessage.Data[4]) && (RxConfigMessage.Data[7] & 0x1C))
       {
-        idle(((RxConfigMessage.Data[4] & 0x1C)>>2)-1);
+        idle(((RxConfigMessage.Data[7] & 0x1C)>>2)-1);
+      }
+      else
+      {
+        if((RxConfigMessage.Data[7] & 0x0C) != 0)
+        {
+          idle(((RxConfigMessage.Data[7] & 0x0C)>>2)-1);
+        }
       }
     }
 
@@ -165,10 +180,10 @@ uint8_t ConfigMessageOn(void)
 {
   if(newConfig)                                                             //new configuration received?
   {
-    if((RxConfigMessage.Data[1] > 0) && (RxConfigMessage.Data[1] < 16) && (RxConfigMessage.Data[4] & 0x20))
+    if((RxConfigMessage.Data[1] > 0) && (RxConfigMessage.Data[1] < 16) && (RxConfigMessage.Data[7] & 0x20))
       angle = RxConfigMessage.Data[1];                                      //set commutation timing
 
-    canlog = RxConfigMessage.Data[4] & 0x01;                                //turn on/off log transmission
+    canlog = RxConfigMessage.Data[7] & 0x01;                                //turn on/off log transmission
 
     newConfig = 0;                                                          //reset flag
     return 1;
