@@ -14,6 +14,7 @@
 
 #define IDLE        600000
 
+//#define current_protection
 #define CURRENTLIMIT 1000
 
 #define flashadress_ADDRESS 0x1000

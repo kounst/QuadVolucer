@@ -35,7 +35,8 @@ extern uint16_t rpm;
 uint16_t curr_count;
 
 uint8_t canlog = 1;
-uint16_t cantimeout = TIMEOUT;             //CAN speed frame timeout in ms
+uint16_t cantimer;             
+uint16_t timeout;              //CAN speed frame timeout in ms
 volatile uint8_t newConfig = 0;
 extern uint16_t slopecount;
 
@@ -150,6 +151,7 @@ void SysTick_Handler(void)
 {
   static uint8_t prescaler = CANLOGprescaler;
 
+  #ifdef current_protection
   if(op_mode == off)
   {
     current = 0;
@@ -168,6 +170,7 @@ void SysTick_Handler(void)
     maxpwm += 100;
     setPW(speed);
   }
+  #endif
 
   if(canlog)
   {
@@ -191,9 +194,9 @@ void SysTick_Handler(void)
 
   TimingDelay_Decrement();  //Decrement ms counter of Delay() function
 
-//  cantimeout--;
-//  if(!cantimeout)           //turn off motor if CAN speed frame has timed out
-//    speed = 0;
+  cantimer--;
+  if(!cantimer)           //turn off motor if CAN speed frame has timed out
+    speed = 0;
 
   if(idle_song-1)
     idle_song--;
@@ -212,7 +215,6 @@ void SysTick_Handler(void)
   */
 void ADC1_2_IRQHandler(void)
 {
-  uint16_t new_current;
   if( ADC_GetITStatus(ADC1, ADC_IT_JEOC) != RESET)
   {
     /* Clear ADC1 JEOC pending interrupt bit */
@@ -359,10 +361,10 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
     {
       setPW(speed);
     }
-    cantimeout = TIMEOUT;                                                                           //reset CAN timeout
+    cantimer = timeout;                                                                           //reset CAN timeout
   }
   
-  if ((RxMessage.StdId == 0x100)&&(RxMessage.IDE == CAN_ID_STD)&&(RxMessage.DLC == 5))              //valid config frame?
+  if ((RxMessage.StdId == 0x100)&&(RxMessage.IDE == CAN_ID_STD)&&(RxMessage.DLC == 8))              //valid config frame?
   {
     RxConfigMessage = RxMessage;
     newConfig = 1;                                                                                  //set newConfig frame flag
@@ -381,12 +383,3 @@ void USB_LP_CAN1_RX0_IRQHandler(void)
 {
 }*/
 
-/**
-  * @}
-  */ 
-
-/**
-  * @}
-  */ 
-
-/******************* (C) COPYRIGHT 2009 STMicroelectronics *****END OF FILE****/
