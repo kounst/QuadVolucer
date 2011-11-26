@@ -49,13 +49,13 @@ void Com_TIM_Configuration(void)
 
 void Com_enable(void)
 { 
-  /* TIM2 enable counter */
+  /* TIM2 enable timer */
   TIM_Cmd(TIM2, ENABLE);
 }
 
 
 void Com_disable(void)
 { 
-  /* TIM2 disable counter */
+  /* TIM2 disable timer */
   TIM_Cmd(TIM2, DISABLE);
 }
