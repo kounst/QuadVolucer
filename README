@@ -12,9 +12,7 @@ canBLC is a motor controller for BLDC motors. It is meant to be used with multic
 
 	status:	- Hardware design is finished 
 		- Software basic features working (only CAN support)
-		- current fault protection in progress
 
-	todo:	- implement current fault protection
-		- extensive testing
-		- implementation of PWM and I2C interface.
+	todo:	- extensive testing
 		- testing on the QuadVolucer :-)
+		- implementation of PWM and I2C interface.
