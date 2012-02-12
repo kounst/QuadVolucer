@@ -18,5 +18,5 @@ uint8_t ConfigMessageOn    (void);
 #define flashcantimeout 0x1005
 
 /* Motor stops when there has no CAN speed frame been received for more than TIMEOUT ms  */
-#define TIMEOUT         100    //can message timeout in ms  
+#define TIMEOUT         10000    //can message timeout in ms  
 #define CANLOGprescaler 100     //can log timebase in ms
