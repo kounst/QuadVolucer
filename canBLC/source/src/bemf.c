@@ -10,7 +10,7 @@
 #include "bemf.h"
 
 
-volatile uint16_t angle=2; // 30°/angle = 15°
+volatile uint16_t angle=4; // 30°/angle = 15°
 uint16_t com_period;
 uint8_t BEMF_active = 0;
 uint16_t slopecount =0;

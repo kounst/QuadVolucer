@@ -78,6 +78,13 @@ void start_state(void)
   set_pwm_high(TIM_Channel_3);
 }
 
+void start_state2(void)
+{
+  set_____low(TIM_Channel_1);
+  set_____off(TIM_Channel_2);
+  set_pwm_high(TIM_Channel_3);
+}
+
 
 void test_high(void)
 {

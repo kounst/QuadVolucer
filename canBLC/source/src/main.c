@@ -140,10 +140,19 @@ int main(void)
         break;
 
       case start:
-        startup(startmode);
+        if(!startup(startmode))
+        {
+          op_mode = running;
 
-        op_mode = running;
-        setPW(speed);
+          
+          //setPW(300);
+          //Delay(200);
+          setPW(speed);
+        }
+        else
+        {
+          op_mode = stop;
+        }
 
         break;
 
@@ -155,6 +164,7 @@ int main(void)
         op_mode = off;
 
         idle_song = IDLE;
+
         break;
 
       case running:

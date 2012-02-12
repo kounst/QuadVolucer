@@ -87,7 +87,7 @@ uint8_t ConfigMessageOff(void)
       minpwm  = MINPWM;
       maxpwm  = MAXPWM;
       angle   = ANGLE;
-      timeout = 100;    //set timeout to 100ms
+      timeout = TIMEOUT;    //set timeout to 100ms
 
       FLASH_Unlock();
 

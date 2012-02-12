@@ -179,8 +179,8 @@ void SysTick_Handler(void)
       prescaler = 100;
       //current =  ADC_GetInjectedConversionValue(ADC2, ADC_InjectedChannel_1);
       //current = 0.95 * current + ADC_GetConversionValue(ADC2);
-      TxMessage.Data[0] = (current >> 8);
-      TxMessage.Data[1] =  current;
+      //TxMessage.Data[0] = (current >> 8);
+      //TxMessage.Data[1] =  current;
       TxMessage.Data[2] =  maxpwm>>8;
       TxMessage.Data[3] =  maxpwm;
       TxMessage.Data[4] = (rpm>>8);              // RPM high byte
