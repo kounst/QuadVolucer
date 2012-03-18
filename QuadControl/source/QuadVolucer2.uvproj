@@ -441,6 +441,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\CAN.c</FilePath>
             </File>
+            <File>
+              <FileName>mpx_rc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\mpx_rc.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
