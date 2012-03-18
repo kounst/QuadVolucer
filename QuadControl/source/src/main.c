@@ -46,6 +46,10 @@ volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_
                                                                                                   
 static __IO uint32_t TimingDelay;                                                                  
 extern CanTxMsg TxMessage;
+
+
+extern uint8_t NoofByte;
+extern char *TxBuf;
                                                                                                   
                                                                                                   
 /* Private function prototypes -----------------------------------------------*/                 
@@ -62,11 +66,14 @@ void I2C2_Configuration(void);
 void CalibrateRC(void);
 void CalibrateGyro(void);
 void GUI_com(void);
-
+uint8_t CheckStickPosition(uint8_t, uint8_t, uint8_t, uint8_t);
 
 
 
 /* Private functions ---------------------------------------------------------*/
+
+
+
 
 /**
   * @brief   Main program
@@ -121,15 +128,16 @@ int main(void)
   /* I2C configuration for Gyro*/
   I2C_Configuration();
 
-  if((RCC_GetFlagStatus(RCC_FLAG_PORRST) == SET))                     //calibrate only if there was a powerdown reset
+  if((RCC_GetFlagStatus(RCC_FLAG_PORRST) == SET))              //calibrate only if there was a powerdown reset
   {
     RCC_ClearFlag();                                                  //clears all reset flags
     Delay(3000);
   
-    if((pulswidth.puls.pw4 < 8700) && (pulswidth.puls.pw3 < 8700))    //stick position: lower left corner
+    //if((pulswidth.puls.pw4 < 8700) && (pulswidth.puls.pw3 < 8700))  //stick position: lower left corner
+    if(!CheckStickPosition(1,0,0,1))                                  //Stick lower left corner?
     { 
       QuadC_LEDOn(LED2);
-      while(pulswidth.puls.pw3 < 9000);                               //while stick in lower left corner
+      while(!CheckStickPosition(1,0,0,1));                            //while stick in lower half
       Delay(200);
       QuadC_LEDOff(LED2);
       CalibrateRC();
@@ -169,16 +177,45 @@ int main(void)
       mixer();                                                        //angular volocity control and mixing of channels
 
       GUI_com();                                                      //handels communication with gui
+      
+      
 
       if(vadc < low_bat)                                              //checks batterie voltage
       {
-        lowbat_flag = 1;                                              //there is no clearing this flag
+       // lowbat_flag = 1;                                            //there is no clearing this flag
       }
     }   
   }
 }
 
 
+
+
+
+/**
+  * @brief  checks whether stick is in specified position.
+  * @param  roll left, roll right, throttle high, throttle low  (e.g. for lower left corner 1,0,0,1)
+  * @retval 0, 1
+  */
+uint8_t CheckStickPosition(uint8_t roll_left, uint8_t roll_right, uint8_t throttle_up, uint8_t throttle_down)
+{
+  uint8_t left = 0;
+  uint8_t right = 0;
+  uint8_t up = 0;
+  uint8_t down = 0;
+
+  
+  if(pulswidth.puls.pw4 > (PW_uncalibrated_neutral + 500))
+    up = 1;
+  if(pulswidth.puls.pw4 < (PW_uncalibrated_neutral - 500))
+    down = 1;
+  if(pulswidth.puls.pw3 > (PW_uncalibrated_neutral + 500))
+    right = 1;
+  if(pulswidth.puls.pw3 < (PW_uncalibrated_neutral - 500))
+    left = 1;
+
+  return ((roll_left ^ left) || (roll_right ^ right) || (throttle_up ^ up) || (throttle_down ^ down));
+}
 
 
 
@@ -282,6 +319,8 @@ void TimingDelay_Decrement(void)
     TimingDelay--;
   }
 }
+
+
 
 
 
@@ -436,7 +475,7 @@ void NVIC_Configuration(void)
 
   /* Enable the TIM3 gloabal interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
@@ -467,7 +506,7 @@ void NVIC_Configuration(void)
 #ifdef CAN_blc
   /* Enable CAN1 RX interrupt */ 
   NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
   NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
@@ -486,14 +525,14 @@ void NVIC_Configuration(void)
 //  NVIC_Init(&NVIC_InitStructure);
 
     NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
 
     /* Enable the USART2 Interrupt */
     NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
+    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
     NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
     NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
     NVIC_Init(&NVIC_InitStructure);
