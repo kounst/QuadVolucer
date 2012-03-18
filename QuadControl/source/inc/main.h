@@ -6,6 +6,7 @@
 
 void TimingDelay_Decrement  (void);
 
+
 /* Private typedef -----------------------------------------------------------*/
 
 /* Private define ------------------------------------------------------------*/
@@ -15,12 +16,25 @@ void TimingDelay_Decrement  (void);
 
 #define LOWBAT  1966          //9V  1V == 218,4905
 #define CAN_blc
+#define MPX
+
+#ifdef MPX
+  #define PW_uncalibrated_neutral 2029
+#endif
+#ifdef ACT
+  #definde PW_uncalibrated_neutral 11000
+#endif
+
+
 
 //if there is no stored value in the eeprom this will be used-----
 #define NEUTRAL_ROTATE_ROLL     11059               
 #define NEUTRAL_ROTATE_PITCH    11059
 #define NEUTRAL_ROTATE_YAW      11059
 #define NEUTRAL_ROTATE_THROTTLE 8300
+
+
+
 
 #define P_GAIN                  0.122
 #define I_GAIN                  0
