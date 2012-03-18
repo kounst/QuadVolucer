@@ -84,7 +84,12 @@ void USART_Configuration()
 void USART_RC_Config()
 {
   USART_InitTypeDef USART_InitStructure;
+  #ifdef ACT
   USART_InitStructure.USART_BaudRate = 38400;
+  #endif
+  #ifdef MPX
+  USART_InitStructure.USART_BaudRate = 115200;
+  #endif
 
   USART_InitStructure.USART_WordLength = USART_WordLength_8b;
   USART_InitStructure.USART_StopBits = USART_StopBits_1;

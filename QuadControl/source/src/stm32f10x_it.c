@@ -14,6 +14,7 @@
 #include "GPIO.h"
 #include "I2C.h"
 #include "rcdsl.h"
+#include "mpx_rc.h"
 #include "UART.h"
 
   /** I2C addresses */
@@ -42,6 +43,8 @@ extern uint8_t lowbat_flag;
 extern uint8_t *TxBuf;
 extern CanTxMsg TxMessage;
 extern CanRxMsg RxConfigMessage;
+
+extern uint8_t sync_gap;
 
 
 /******************************************************************************/
@@ -137,6 +140,7 @@ void PendSV_Handler(void)
 void SysTick_Handler(void)
 {
   slave++;
+  sync_gap++;
   if(slave > 4)                //number of motors
 	{
     slave = 0;
@@ -144,17 +148,19 @@ void SysTick_Handler(void)
     #ifndef CAN_blc
     I2C2_Configuration();
     #endif
-	}
-  else
-  {
+
     #ifdef CAN_blc
     TxMessage.Data[0] = gas.front;
     TxMessage.Data[1] = gas.right;
     TxMessage.Data[2] = gas.rear;
     TxMessage.Data[3] = gas.left;
-    CAN_Transmit(CAN1, &TxMessage);
+    //CAN_Transmit(CAN1, &TxMessage);
+    #endif
 
-    #else
+	}
+  else
+  {
+    #ifndef CAN_blc
     I2C_ClearFlag(I2C2, I2C_FLAG_AF | I2C_FLAG_ARLO | I2C_FLAG_BERR);
     I2C_ClearITPendingBit(I2C2, I2C_IT_ARLO | I2C_IT_BERR | I2C_IT_TIMEOUT | I2C_IT_AF | I2C_IT_ADD10 | I2C_IT_SB | I2C_IT_ADDR);
     I2C_ITConfig(I2C2, I2C_IT_EVT, ENABLE);
@@ -527,7 +533,12 @@ void USART1_IRQHandler(void)
 *******************************************************************************/
 void USART2_IRQHandler(void)
 {
+  #ifdef ACT
   rcdsl_parse_data(USART_ReceiveData(USART2));
+  #endif
+  #ifdef MPX
+  mpx_parse_data(USART_ReceiveData(USART2));
+  #endif
 }
 
 
