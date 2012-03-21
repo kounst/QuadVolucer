@@ -36,11 +36,11 @@ void mpx_parse_data(uint8_t rx_byte)
   
   if(bytecount == 26 && crc_ccitt == 0)
   {
-    pulswidth.pw[0] = ((uint16_t)rx_data[1] << 8) | rx_data[2];
-    pulswidth.pw[1] = ((uint16_t)rx_data[3] << 8) | rx_data[4];
-    pulswidth.pw[2] = ((uint16_t)rx_data[5] << 8) | rx_data[6];
-    pulswidth.pw[3] = ((uint16_t)rx_data[7] << 8) | rx_data[8];
-    pulswidth.pw[4] = ((uint16_t)rx_data[9] << 8) | rx_data[10];
+    pulswidth.pw[0] = ((uint16_t)rx_data[1]  << 8) | rx_data[2];
+    pulswidth.pw[1] = ((uint16_t)rx_data[3]  << 8) | rx_data[4];
+    pulswidth.pw[2] = ((uint16_t)rx_data[5]  << 8) | rx_data[6];
+    pulswidth.pw[3] = ((uint16_t)rx_data[7]  << 8) | rx_data[8];
+    pulswidth.pw[4] = ((uint16_t)rx_data[9]  << 8) | rx_data[10];
     pulswidth.pw[5] = ((uint16_t)rx_data[11] << 8) | rx_data[12];
   }
 

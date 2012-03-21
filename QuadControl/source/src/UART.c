@@ -191,7 +191,7 @@ void GUI_com()
     gui_PARA[18] = 0;                                 //expo                          - not implemented
     gui_PARA[19] = 0;                                 //expo                          - not implemented
     gui_PARA[20] = idle_throttle;                     //minimum throttle  
-    gui_PARA[21] = (uint8_t)((low_bat + 5) / 11.09);        //voltage warning    
+    gui_PARA[21] = (uint8_t)((low_bat + 5) / 11.09);  //voltage warning    
     gui_PARA[22] = 0;                                 //acc_x offset                  - not implemented
     gui_PARA[23] = 0;                                 //acc_y offset                  - not implemented
     gui_PARA[24] = 4;                                 //throttle channel              - hardcoded
@@ -235,7 +235,7 @@ void GUI_com()
     gui_SENSOR[8]  = (uint8_t)((set.rotate.roll + 3825) / 30);
     gui_SENSOR[9]  = (uint8_t)((set.rotate.pitch + 3825) / 30);
     gui_SENSOR[10] = (uint8_t)((set.rotate.yaw + 3825) / 30);
-    gui_SENSOR[11] = (uint8_t)((pulswidth.puls.pw6 - 7350) / 30);
+    gui_SENSOR[11] = (uint8_t)((pulswidth.puls.pw6 - 566) / 12);
     gui_SENSOR[12] = (uint8_t)((vadc / 5.44) - 256);
 
 

@@ -57,10 +57,10 @@ int modeswitch = 0;
 void mixer()
 {
 	//throttle: 0 ... 4000; roll,pitch,yaw: -2000 ... 2000;
-  set.rotate.throttle = (pulswidth.puls.pw4 - neutral.rotate.throttle)/1.5; 
-	set.rotate.roll = (-pulswidth.puls.pw1 + neutral.rotate.roll);
-  set.rotate.pitch = (pulswidth.puls.pw2 - neutral.rotate.pitch);
-  set.rotate.yaw = (pulswidth.puls.pw3 - neutral.rotate.yaw);
+  set.rotate.throttle = (pulswidth.puls.pw4 - neutral.rotate.throttle) * 1.67; 
+	set.rotate.roll = (-pulswidth.puls.pw1 + neutral.rotate.roll) * 2.5;
+  set.rotate.pitch = (pulswidth.puls.pw2 - neutral.rotate.pitch) * 2.5;
+  set.rotate.yaw = (pulswidth.puls.pw3 - neutral.rotate.yaw) * 2.5;
 
 
 
@@ -69,8 +69,8 @@ void mixer()
   levelcontroller(GyroY, 1);
   yawcontroller(GyroZ);
 
-  throttle = 0.95 * throttle + (1 - 0.95) * pulswidth.puls.pw4;       //used for mode selection only
-  modeswitch = 0.95  * modeswitch + (1 - 0.95) * pulswidth.puls.pw6;  //used for mode selection only
+  throttle = 0.95 * throttle + (1 - 0.95) * pulswidth.puls.pw4 * 2.5;       //used for mode selection only
+  modeswitch = 0.95  * modeswitch + (1 - 0.95) * pulswidth.puls.pw6 * 2.5;  //used for mode selection only
 
 
 
