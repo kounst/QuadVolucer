@@ -11,6 +11,7 @@
 #include  "stm32f10x.h"
 #include "mixer.h"
 #include "main.h"
+#include "GPIO.h"
 
 
 /* Private variables ---------------------------------------------------------*/  
@@ -80,9 +81,9 @@ void mixer()
 		case off:
 		{
 			mode_off();
-		
+
 			//pwrmode change
-			if(modeswitch > 9000  && throttle < 8700)
+			if(modeswitch > 3000 && throttle < 3000)
 				pwrmode = standby;
 			break;
 		}
@@ -90,13 +91,13 @@ void mixer()
 		case standby:
 		{		
 			mode_standby();
-		
+
 			//pwrmode change
-			if(modeswitch < 9000)
+			if(modeswitch < 3000)
 				pwrmode = off;
 			else
 			{
-				if(modeswitch > 12500 && throttle < 8700)
+				if(modeswitch > 6000 && throttle < 3000)
 					pwrmode = flight;
 			}
 			break;
@@ -107,7 +108,7 @@ void mixer()
 			mode_flight();
 			
 			//pwrmode change
- 			if(modeswitch < 12500 && throttle < 8700)
+ 			if(modeswitch < 6000 && throttle < 3000)
 				pwrmode = standby;
 		}		
 	}
