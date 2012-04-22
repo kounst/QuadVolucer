@@ -11,16 +11,6 @@
 #define LED1_GPIO_PORT					GPIOA
 #define LED2_GPIO_PORT					GPIOA
 #define SUMMER_GPIO_PORT        GPIOB
-//#define TP1_GPIO_PORT           GPIOA
-//#define TP2_GPIO_PORT           GPIOB
-//#define TP3_GPIO_PORT           GPIOB
-//#define TP4_GPIO_PORT           GPIOB
-//#define TP5_GPIO_PORT           GPIOB
-//#define TP1_PIN                 GPIO_Pin_15
-//#define TP2_PIN                 GPIO_Pin_3
-//#define TP3_PIN                 GPIO_Pin_4
-//#define TP4_PIN                 GPIO_Pin_5
-//#define TP5_PIN                 GPIO_Pin_12
 
 
 /* Private typedef -----------------------------------------------------------*/
@@ -45,6 +35,3 @@ void GPIO_Configuration(void);
 void QuadC_LEDToggle(Led_TypeDef Led);
 void QuadC_LEDOn(Led_TypeDef Led);
 void QuadC_LEDOff(Led_TypeDef Led);
-void DISCC_TPToggle(TP_TypeDef TP);
-void DISCC_TPOn(TP_TypeDef TP);
-void DISCC_TPOff(TP_TypeDef TP);
