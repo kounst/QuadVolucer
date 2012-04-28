@@ -322,36 +322,6 @@ void I2C1_EV_IRQHandler(void)
       
       	/* Enable Acknowledgement to be ready for another reception */
       	I2C_AcknowledgeConfig (I2C1, ENABLE);
-//      if(n == 1)
-//      {
-//        /* While there is data to be read */
-//  			I2C_AcknowledgeConfig (I2C1, DISABLE);		/* Disable Acknowledgement */
-//  			I2C_GenerateSTOP (I2C1, ENABLE);			/* Send STOP Condition */
-//      }
-//      	break;
-//
-//    case I2C_EVENT_MASTER_BYTE_RECEIVED:
-//          {
-//            if(n == 1)
-//            {
-//              /* While there is data to be read */
-//        			I2C_AcknowledgeConfig (I2C1, DISABLE);		/* Disable Acknowledgement */
-//        			I2C_GenerateSTOP (I2C1, ENABLE);			/* Send STOP Condition */
-//            }
-//      			if(n == 2)
-//      				I2C_AcknowledgeConfig (I2C1, DISABLE);		/* Disable Acknowledgement */
-//      			
-//      			/* Read a byte from the EEPROM */
-//      			buf[0] = I2C_ReceiveData (I2C1);
-//      			/* Point to the next location where the byte read will be saved */
-//      			//buffer ++; 
-//      			/* Decrement the read bytes counter */
-//      			n --;    
-//      		   
-//      	}
-      
-//      	/* Enable Acknowledgement to be ready for another reception */
-//      	I2C_AcknowledgeConfig (I2C1, ENABLE);
 
         break;
       
