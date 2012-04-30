@@ -73,6 +73,49 @@ void I2C2_Configuration(void)
   I2C_ITConfig(I2C2, I2C_IT_EVT , ENABLE);
 }
 
+void InitGyro(void)
+{
+  writemem (ITG3200_SLAVE_ADDR, 0x15, ITG3200_SMPLRT_DIV);
+  writemem (ITG3200_SLAVE_ADDR, 0x16, ITG3200_FS_SEL + ITG3200_DLPF_CFG);
+  writemem (ITG3200_SLAVE_ADDR, 0x3E, ITG3200_PWR_MANAG);
+  
+}
+
+void writemem(unsigned char i2c_address, unsigned char reg_address, uint8_t value )
+{
+  while(I2C_GetFlagStatus (I2C1, I2C_FLAG_BUSY));
+	/* Send START condition */
+	I2C_GenerateSTART (I2C1, ENABLE);
+
+	/* Test on EV5 and clear it */
+	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+	
+  /* Send I2C address for write */
+	I2C_Send7bitAddress (I2C1, ITG3200_SLAVE_ADDR, I2C_Direction_Transmitter);
+
+	/* Test on EV6 and clear it */
+	while (!I2C_CheckEvent (I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+
+	/* Send the Gyro's internal address to write to */
+	I2C_SendData (I2C1, reg_address);
+	/* Test on EV8 and clear it */
+	while (!I2C_CheckEvent (I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+//  /* Send STRAT condition a second time */  
+//	I2C_GenerateSTART (I2C1, ENABLE);
+//	/* Test on EV5 and clear it */
+//	while (!I2C_CheckEvent (I2C1, I2C_EVENT_MASTER_MODE_SELECT));
+//	/* Send Gyro address for write */
+//	I2C_Send7bitAddress (I2C1, ITG3200_SLAVE_ADDR, I2C_Direction_Transmitter);
+//  /* Test on EV6 and clear it */
+//	while (!I2C_CheckEvent (I2C1, I2C_EVENT_MASTER_TRANSMITTER_MODE_SELECTED));
+//  /* Send the data to write to register */
+	I2C_SendData (I2C1, value);
+  /* Test on EV8 and clear it */
+	while (!I2C_CheckEvent (I2C1, I2C_EVENT_MASTER_BYTE_TRANSMITTED));
+  I2C_GenerateSTOP (I2C1, ENABLE);			/* Send STOP Condition */
+
+}
+
 
 void readmem (unsigned char addr, uint8_t *buf, int n)
 {
@@ -84,7 +127,7 @@ void readmem (unsigned char addr, uint8_t *buf, int n)
 	while (!I2C_CheckEvent(I2C1, I2C_EVENT_MASTER_MODE_SELECT));
 	/* In the case of a single data transfer disable ACK before reading the data */
 
-	/* Send EEPROM address for write */
+	/* Send I2C address for write */
 	I2C_Send7bitAddress (I2C1, ITG3200_SLAVE_ADDR, I2C_Direction_Transmitter);
 
 	/* Test on EV6 and clear it */

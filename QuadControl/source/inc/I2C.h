@@ -27,6 +27,10 @@
 /* Exported constants --------------------------------------------------------*/
 
 #define ITG3200_SLAVE_ADDR  0xD0
+#define ITG3200_DLPF_CFG    0      //register: DLPF_CFG - low pass filter configuration 256Hz
+#define ITG3200_FS_SEL      0x18   //2000°/s
+#define ITG3200_SMPLRT_DIV  0      //8000Hz: gyro sample rate
+#define ITG3200_PWR_MANAG   0x03   //register: Power Management  --  value: PLL with Z Gyro reference
 
 
 
@@ -136,6 +140,7 @@ typedef enum
 void I2C_Configuration(void);
 void I2C2_Configuration(void);
 void readmem(unsigned char, uint8_t *, int);
+void writemem(unsigned char, unsigned char, uint8_t);
 Status I2C_Master_BufferRead(I2C_TypeDef* I2Cx, uint8_t* pBuffer,  uint32_t NumByteToRead, I2C_ProgrammingModel Mode, uint8_t SlaveAddress);
 Status I2C_Master_BufferWrite(I2C_TypeDef* I2Cx, uint8_t* pBuffer,  uint32_t NumByteToWrite, I2C_ProgrammingModel Mode, uint8_t SlaveAddress);
 void I2C_Slave_BufferReadWrite(I2C_TypeDef* I2Cx,I2C_ProgrammingModel Mode);
