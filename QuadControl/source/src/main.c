@@ -128,6 +128,10 @@ int main(void)
   /* I2C configuration for Gyro*/
   I2C_Configuration();
 
+  Delay(5);
+
+  InitGyro();
+
   if((RCC_GetFlagStatus(RCC_FLAG_PORRST) == SET))              //calibrate only if there was a powerdown reset
   {
     RCC_ClearFlag();                                                  //clears all reset flags
@@ -182,7 +186,7 @@ int main(void)
 
       if(vadc < low_bat)                                              //checks batterie voltage
       {
-       // lowbat_flag = 1;                                            //there is no clearing this flag
+        lowbat_flag = 1;                                            //there is no clearing this flag
       }
     }   
   }
