@@ -28,6 +28,8 @@ extern union pulsw pulswidth;
 extern int16_t GyroX, GyroY, GyroZ;
 volatile uint8_t idle_throttle;
 int differential_error =0;
+int differential_error1 =0;
+int differential_error2 =0;
 
 volatile float K_p, K_i, K_d;
 
@@ -123,41 +125,24 @@ void mixer()
 *******************************************************************************/
 void levelcontroller(int16_t gyro, int axis)
 {
-	//K_i = 0;//0.000090;
-//  K_i = ((float)pulswidth.puls.pw7 - 7300)/3650000;
-//	if(K_i < 0)
-//	  K_i = 0;
-	
-  //K_p = 0.122;
-//	K_p = ((float)pulswidth.puls.pw5 - 7300)/10000;
-//  if(K_p < 0)
-//     K_p = 0;
-	
-	//K_d = 0;
-//  K_d = ((float)pulswidth.puls.pw7 - 7600)/1000;
-//  if(K_d < 0)
-//    K_d = 0;
-  
-	//gyro -= level.gyroneutrl[axis];
-	
-  level.levelerror[axis] = set.level[axis]*8 - gyro;
+  level.levelerror[axis] = set.level[axis] - gyro;
 
 	if(pwrmode == flight)
     level.levelerror_int[axis] += level.levelerror[axis];
   else
     level.levelerror_int[axis] = 0; 
-  
-    //rollerror_int = 500;
-  // if(level.levelerror_int[axis] > 0)
-    // level.levelerror_int[axis] -= 1;
-  // if(level.levelerror_int[axis] < 0)
-    // level.levelerror_int[axis] += 1;
+
 	if(level.levelerror_int[axis] > 20000)
 	  level.levelerror_int[axis] = 20000;
 	if(level.levelerror_int[axis] < -20000)
 	  level.levelerror_int[axis] = -20000;
 
-  differential_error = (level.levelerror[axis] - level.levellasterror[axis]);
+  differential_error = (level.levelerror[axis] - level.levellasterror[axis]) + differential_error1 + differential_error2;
+  differential_error2 = differential_error1;
+  differential_error1 = (level.levelerror[axis] - level.levellasterror[axis]);
+  
+
+  //differential_error = 
   if(differential_error < -20000)   //limit differential_error 
     differential_error = -20000;
   if(differential_error > 20000)
@@ -175,11 +160,8 @@ void levelcontroller(int16_t gyro, int axis)
 
 void yawcontroller(int16_t gyro)
 {
-  //gyro = 0;
-  //K_pY = ((float)pulswidth.puls.pw7 - 7300)/73000;
-  //  K_pY = 0.050;
-  //if(K_pY < 0)
-  yaw.yawerror = set.rotate.yaw*4 + gyro;
+
+  yaw.yawerror = set.rotate.yaw + gyro*2;
 
   yaw.yawsign = K_pY * yaw.yawerror + K_iY * yaw.yawerror_int - K_dY * (yaw.yawerror - yaw.yawlasterror);
 
