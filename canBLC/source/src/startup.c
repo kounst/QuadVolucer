@@ -82,7 +82,7 @@ uint8_t startup(uint8_t mode)
   //if(mode)
     forced_start_ramp();
   //else
-  //  forced_start_push();
+   // forced_start_push();
 
   //Delay(50);
 
@@ -94,7 +94,7 @@ uint8_t startup(uint8_t mode)
     if(speed > minpwm)
     {
       BEMF_active = 1;
-      Delay(1000);
+      //Delay(1000);
     }
     else
     {
@@ -139,16 +139,19 @@ void forced_start_ramp(void)
   slopecount = 0;
 
   TIM_ITConfig(TIM2, TIM_IT_CC1, ENABLE);
-  for(i = 427; i > 0; i--)
+  for(i = 1800; i > 0; i--)
   {
     Delay(2);
     if(speed < minpwm)
       break;
     //forced_period -= 200;
-    forced_period *= 0.995;
+    forced_period *= 0.999;
     
   }
-  TIM_GenerateEvent(TIM1, TIM_EventSource_COM);
+  //while(speed){}
+  Delay(2000);
+
+  //TIM_GenerateEvent(TIM1, TIM_EventSource_COM);
 
 }
 

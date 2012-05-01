@@ -39,6 +39,8 @@ uint16_t maxpwm = MAXPWM;
 uint16_t address = 0;
 uint32_t idle_song = IDLE;
 extern uint32_t flashADDRESS;
+
+uint16_t voltage=123;
  
 
 extern uint16_t slopecount;
@@ -88,14 +90,16 @@ int main(void)
 
   /* GPIO Configuration */
   GPIO_Configuration();
-
+  
   /* SysTick Configuration */
   SysTick_Configuration();
 
   /* Configuration of ADC to detect BEMF zero crossings */
   Com_ADC_Configuration();
 
-  ADC_Current_Configuration();
+  //ADC_Current_Configuration();
+
+  //ADC_Test_Configuration();
 
   /* Comutation Timer Configuration */
   Com_TIM_Configuration();
@@ -119,10 +123,17 @@ int main(void)
   /* IT Configuration for CAN1 */  
   CAN_ITConfig(CAN1, CAN_IT_FMP0, ENABLE);
 
+  GPIO_WriteBit(GPIOA, GPIO_Pin_11, (BitAction)1);  //enable bridge driver
+  //Delay(50);
+
   startbeep();
 
   Delay((address+1) * 200);
   beep(700,200);
+  
+  //while(1){}
+
+  //speed = 100;
  
 
   while (1)
@@ -145,9 +156,9 @@ int main(void)
           op_mode = running;
 
           
-          //setPW(300);
-          //Delay(200);
           setPW(speed);
+          //Delay(200);
+          //setPW(speed);
         }
         else
         {
@@ -168,7 +179,7 @@ int main(void)
         break;
 
       case running:
-        ConfigMessageOn();
+        //ConfigMessageOn();
         
         if(speed < minpwm)
         {
@@ -338,11 +349,11 @@ void NVIC_Configuration(void)
   NVIC_Init(&NVIC_InitStructure);
 
   
-  NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
+//  NVIC_InitStructure.NVIC_IRQChannel = TIM1_UP_IRQn;
+//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
+//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
+//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+//  NVIC_Init(&NVIC_InitStructure);
 
   /* Configure and enable ADC interrupt */
   NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;

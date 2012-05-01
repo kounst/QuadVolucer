@@ -15,6 +15,7 @@ uint16_t com_period;
 uint8_t BEMF_active = 0;
 uint16_t slopecount =0;
 extern uint16_t curr_count;
+extern uint8_t state;
 
 void next_commutation (uint16_t edge)
 {
@@ -27,12 +28,17 @@ void next_commutation (uint16_t edge)
   static uint8_t last_cond_fall; 
 
   new_bemf_sample = ADC_GetInjectedConversionValue(ADC1, ADC_InjectedChannel_1);
-  //GPIO_WriteBit(GPIOA, GPIO_Pin_7, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_7)));
+
+  //GPIO_WriteBit(GPIOB, GPIO_Pin_9, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOB, GPIO_Pin_9)));
 
   if(edge == 0)  // 0 is falling edge
   {
-    if(new_bemf_sample == 0 && last_cond_fall > 1)
+    if(new_bemf_sample == 0)// && last_cond_fall > 1)
     {
+      //if((state == 3) || (state == 6))
+      //  GPIO_WriteBit(GPIOB, GPIO_Pin_9, (BitAction)(0));
+      
+      GPIO_WriteBit(GPIOA, GPIO_Pin_3, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_3)));
       slopecount++;
 
       last_com = TIM_GetCapture1(TIM2);
@@ -47,15 +53,19 @@ void next_commutation (uint16_t edge)
       last_cond_fall = 0;
 
     }
-    else
-    {
-      last_cond_fall++;
-    }
+//    else
+//    {
+//      last_cond_fall++;
+//    }
   }
   else          // rising edge
   {
-    if(new_bemf_sample > 25 && last_cond_rise > 1)
+    if(new_bemf_sample > 25)// && last_cond_rise > 1)
     {
+      //if((state == 3) || (state == 6))
+      //  GPIO_WriteBit(GPIOB, GPIO_Pin_9, (BitAction)(1));
+      GPIO_WriteBit(GPIOA, GPIO_Pin_5, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_5)));
+
       slopecount++;
 
       last_com = TIM_GetCapture1(TIM2);
@@ -70,10 +80,10 @@ void next_commutation (uint16_t edge)
       last_cond_rise = 0;
 
     }
-    else
-    {
-      last_cond_rise++;
-    }
+//    else
+//    {
+//      last_cond_rise++;
+//    }
   }
 }
 

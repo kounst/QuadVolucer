@@ -33,7 +33,7 @@ void pwm_TIM_Configuration(void)
   /* Time Base configuration */
   TIM_TimeBaseStructure.TIM_Prescaler = 0;
   TIM_TimeBaseStructure.TIM_CounterMode = TIM_CounterMode_Up;  //TIM_CounterMode_CenterAligned1; //
-  TIM_TimeBaseStructure.TIM_Period = 1075;   //33.5kHz
+  TIM_TimeBaseStructure.TIM_Period = 1440;   //25kHz
   TIM_TimeBaseStructure.TIM_ClockDivision = 0;
   TIM_TimeBaseStructure.TIM_RepetitionCounter = 0;
 
@@ -44,30 +44,32 @@ void pwm_TIM_Configuration(void)
   TIM_OCInitStructure.TIM_OutputState = TIM_OutputState_Enable;
   TIM_OCInitStructure.TIM_OutputNState = TIM_OutputNState_Enable;
   TIM_OCInitStructure.TIM_Pulse = MINPWM;
-  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_Low;
   TIM_OCInitStructure.TIM_OCNPolarity = TIM_OCNPolarity_High;
-  TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
+  TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Reset;
   TIM_OCInitStructure.TIM_OCNIdleState = TIM_OCNIdleState_Set;
 
   TIM_OC1Init(TIM1, &TIM_OCInitStructure);
-  TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Disable);
+  TIM_OC1PreloadConfig(TIM1, TIM_OCPreload_Enable);
 
   TIM_OC2Init(TIM1, &TIM_OCInitStructure);
-  TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Disable);
+  TIM_OC2PreloadConfig(TIM1, TIM_OCPreload_Enable);
 
   TIM_OC3Init(TIM1, &TIM_OCInitStructure);
-  TIM_OC3PreloadConfig(TIM1, TIM_OCPreload_Disable);
+  TIM_OC3PreloadConfig(TIM1, TIM_OCPreload_Enable);
 
   TIM_OCInitStructure.TIM_OCMode = TIM_OCMode_PWM2;
-  TIM_OCInitStructure.TIM_Pulse = 1050;
-  TIM_OC4PreloadConfig(TIM1, TIM_OCPreload_Disable);
+  TIM_OCInitStructure.TIM_Pulse = 1400;
+  TIM_OCInitStructure.TIM_OCPolarity = TIM_OCPolarity_High;
+  TIM_OCInitStructure.TIM_OCIdleState = TIM_OCIdleState_Set;
+  TIM_OC4PreloadConfig(TIM1, TIM_OCPreload_Enable);
   TIM_OC4Init(TIM1, &TIM_OCInitStructure);
 
   /* Automatic Output enable, Break, dead time and lock configuration*/
   TIM_BDTRInitStructure.TIM_OSSRState = TIM_OSSRState_Enable;
   TIM_BDTRInitStructure.TIM_OSSIState = TIM_OSSIState_Enable;
   TIM_BDTRInitStructure.TIM_LOCKLevel = TIM_LOCKLevel_OFF;
-  TIM_BDTRInitStructure.TIM_DeadTime = 25;
+  TIM_BDTRInitStructure.TIM_DeadTime = 7;       //194ns
   TIM_BDTRInitStructure.TIM_Break = TIM_Break_Disable;
   TIM_BDTRInitStructure.TIM_BreakPolarity = TIM_BreakPolarity_High;
   TIM_BDTRInitStructure.TIM_AutomaticOutput = TIM_AutomaticOutput_Enable;
@@ -79,7 +81,7 @@ void pwm_TIM_Configuration(void)
   //TIM_SelectMasterSlaveMode(TIM1, TIM_MasterSlaveMode_Enable); 
   //TIM_SelectOutputTrigger(TIM1, TIM_TRGOSource_OC1);
 
-  TIM_ITConfig(TIM1, TIM_IT_COM | TIM_IT_CC4 | TIM_IT_CC1, ENABLE);
+  TIM_ITConfig(TIM1, TIM_IT_COM | TIM_IT_CC4, ENABLE);
   //TIM_ITConfig(TIM1, TIM_IT_COM, ENABLE);
 
   /* TIM1 counter enable */

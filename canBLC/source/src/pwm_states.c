@@ -125,6 +125,7 @@ void pwm_states(void)
     case 1:
 
       //GPIO_WriteBit(GPIOA, GPIO_Pin_5, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_5)));
+      //GPIO_WriteBit(GPIOB, GPIO_Pin_9, (BitAction)(1));
 
       set_____low(TIM_Channel_1);
       set_pwm_high(TIM_Channel_2);
@@ -146,6 +147,7 @@ void pwm_states(void)
     case 2:
 
       //GPIO_WriteBit(GPIOA, GPIO_Pin_5, (BitAction)(1 - GPIO_ReadOutputDataBit(GPIOA, GPIO_Pin_5)));
+      //GPIO_WriteBit(GPIOB, GPIO_Pin_9, (BitAction)(0));
 
       set_____off(TIM_Channel_1);
       set_pwm_high(TIM_Channel_2);
@@ -158,6 +160,8 @@ void pwm_states(void)
       ADC_ExternalTrigInjectedConvCmd(ADC1, DISABLE);
       ADC_InjectedChannelConfig(ADC1, ADC_Channel_9, 1, ADC_SampleTime_13Cycles5);
       ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
+
+      //GPIO_WriteBit(GPIOB, GPIO_Pin_8, (BitAction)(1));
 
       state++;
 
@@ -173,8 +177,9 @@ void pwm_states(void)
       //ADC channel for step2!!
       edge = state%2;
 
+      //GPIO_WriteBit(GPIOB, GPIO_Pin_8, (BitAction)(0));
       ADC_ExternalTrigInjectedConvCmd(ADC1, DISABLE);
-      ADC_InjectedChannelConfig(ADC1, ADC_Channel_3, 1, ADC_SampleTime_13Cycles5);
+      ADC_InjectedChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_13Cycles5);
       ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
 
       state++;
@@ -229,7 +234,7 @@ void pwm_states(void)
       edge = state%2;
 
       ADC_ExternalTrigInjectedConvCmd(ADC1, DISABLE);
-      ADC_InjectedChannelConfig(ADC1, ADC_Channel_3, 1, ADC_SampleTime_13Cycles5);
+      ADC_InjectedChannelConfig(ADC1, ADC_Channel_7, 1, ADC_SampleTime_13Cycles5);
       ADC_ExternalTrigInjectedConvCmd(ADC1, ENABLE);
 
       state = 1;

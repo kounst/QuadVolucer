@@ -10,7 +10,11 @@
 #include "ADC.h"
 
 
-/* Configuration of ADC1 for BEMF detection on Ch3,8,9 */
+
+
+
+
+/* Configuration of ADC1 for BEMF detection on Ch5,8,9 */
 void  Com_ADC_Configuration (void)
 {
   ADC_InitTypeDef ADC_InitStructure;
