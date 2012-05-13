@@ -105,10 +105,10 @@ int main(void)
   /* SysTick Configuration */
   SysTick_Configuration();
 
-  /* UART configuration for gui interface */
+  /* UART configuration for Shrediquette gui interface */
   USART_Configuration();
 
-  /* UART configuration for ACT DSL receiver interface */
+  /* UART configuration for ACT DSL or MPX M-LINK receiver interface */
   USART_RC_Config();
 
 #ifdef CAN_blc
@@ -122,7 +122,7 @@ int main(void)
   /* Configuration of ADC1 for voltage measurement (batterie warning)*/
   ADC1_Configuration();
   
-  /* TIM3_Configuration for gerneration of 2kHz Signal for buzzer */
+  /* TIM3_Configuration for generation of 2kHz Signal for buzzer */
   TIM3_Configuration();                                         
    
   /* I2C configuration for Gyro*/
@@ -244,12 +244,6 @@ void RCC_Configuration(void)
   /* TIM1, GPIOA, GPIOB, GPIOE and AFIO clocks enable */
   RCC_APB2PeriphClockCmd(RCC_APB2Periph_GPIOA |  RCC_APB2Periph_GPIOB | RCC_APB2Periph_AFIO, ENABLE);
 
-  /* TIM1 clock enable */
-  //RCC_APB2PeriphClockCmd(RCC_APB2Periph_TIM1, ENABLE);
-
-  /* TIM2 clock enable */
-  //RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM2, ENABLE);
-
   /* TIM3 clock enable */
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_TIM3, ENABLE);
 
@@ -267,12 +261,6 @@ void RCC_Configuration(void)
 
   /* USART2 clock enable */
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART2, ENABLE);
-
-  /* ADC2 clock enable */
-  //RCC_APB2PeriphClockCmd(RCC_APB2Periph_ADC2, ENABLE);
-  
-  /* DMA2 clock enable */
-  //RCC_AHBPeriphClockCmd(RCC_AHBPeriph_DMA2, ENABLE);
 
   /* CAN1 Periph clock enable */
   RCC_APB1PeriphClockCmd(RCC_APB1Periph_CAN1, ENABLE);
@@ -323,10 +311,6 @@ void TimingDelay_Decrement(void)
     TimingDelay--;
   }
 }
-
-
-
-
 
 
 
@@ -476,37 +460,6 @@ void NVIC_Configuration(void)
   NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
   NVIC_Init(&NVIC_InitStructure);
 #endif
-
-  /* Enable the TIM3 gloabal interrupt */
-  NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
-  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
-  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-  NVIC_Init(&NVIC_InitStructure);
-//
-//  /* Enable the TIM1 Commutation Interrupt */
-//  /* is triggered by TIM2 interrupt*/
-//  NVIC_InitStructure.NVIC_IRQChannel = TIM1_TRG_COM_IRQn;
-//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 1;
-//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//  NVIC_Init(&NVIC_InitStructure); 
-//
-//  /* Enable TIM1 CC interrupt */
-//  /* triggeres ADC conversion */
-//  NVIC_InitStructure.NVIC_IRQChannel = TIM1_CC_IRQn;
-//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 2;
-//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//  NVIC_Init(&NVIC_InitStructure);
-//
-//  /* Configure and enable ADC interrupt */
-//  NVIC_InitStructure.NVIC_IRQChannel = ADC1_2_IRQn;
-//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 3;
-//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 0;
-//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//  NVIC_Init(&NVIC_InitStructure);
-
 #ifdef CAN_blc
   /* Enable CAN1 RX interrupt */ 
   NVIC_InitStructure.NVIC_IRQChannel = USB_LP_CAN1_RX0_IRQn;
@@ -516,30 +469,26 @@ void NVIC_Configuration(void)
   NVIC_Init(&NVIC_InitStructure);
 #endif
 
-  /* Enable the RTC Interrupt */
-//  NVIC_InitStructure.NVIC_IRQChannel = RTC_IRQn;
-//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
-//  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
-//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//  NVIC_Init(&NVIC_InitStructure);
+  /* Enable the TIM3 gloabal interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = TIM3_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 1;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
 
-//  NVIC_InitStructure.NVIC_IRQChannel = RTCAlarm_IRQn;
-//  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 5;
-//  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-//  NVIC_Init(&NVIC_InitStructure);
 
-    NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+  NVIC_InitStructure.NVIC_IRQChannel = USART1_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 2;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
 
-    /* Enable the USART2 Interrupt */
-    NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
-    NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
-    NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
-    NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
-    NVIC_Init(&NVIC_InitStructure);
+  /* Enable the USART2 Interrupt */
+  NVIC_InitStructure.NVIC_IRQChannel = USART2_IRQn;
+  NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 4;
+  NVIC_InitStructure.NVIC_IRQChannelSubPriority = 3;
+  NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;
+  NVIC_Init(&NVIC_InitStructure);
 
 
   /* SysTick Priority */
