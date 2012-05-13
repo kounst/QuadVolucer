@@ -15,7 +15,7 @@ void TimingDelay_Decrement  (void);
 #define countof(a)   (sizeof(a) / sizeof(*(a)))
 
 #define LOWBAT  1966          //9V  1V == 218,4905
-#define CAN_blc
+//#define CAN_blc
 #define MPX
 
 #ifdef MPX
