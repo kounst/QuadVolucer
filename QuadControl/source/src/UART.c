@@ -1,7 +1,7 @@
 // Header:
-// File Name: 
-// Author:
-// Date:
+// File Name: UART.c 
+// Author:    Konstantin Reichmeyer
+// Date:      13.05.12
 
 
 #include "stm32f10x.h"
@@ -53,7 +53,7 @@ void USART_Configuration()
         - BaudRate = 38400 baud  
         - Word Length = 8 Bits
         - One Stop Bit
-        - Odd parity
+        - No parity
         - Hardware flow control disabled (RTS and CTS signals)
         - Receive and transmit enabled
   */
@@ -106,11 +106,17 @@ void USART_RC_Config()
   USART_Cmd(USART2, ENABLE);
 }
 
+
+
 /*******************************************************************************
 * Function Name  : GUI_com()
-* Description    : 
-* Input          : None
-* Output         : None
+* Description    : This is the implementation of an interface to the MAV configuration GUI (TriGUI) by W. Thielicke.
+*                : http://shrediquette.blogspot.de/
+*                :
+*                : This function checks wheather certain flags were set by GUI_receiver() function.
+*                : Depending on those flags it sends back data or changes local parameters. 
+* Input          : 
+* Output         : 
 * Return         : None
 *******************************************************************************/
 void GUI_com()
@@ -121,7 +127,6 @@ void GUI_com()
   {
     //reset device                                        //not implemented as the gui doesn't seem to use this command anyway
     gui_RESET = 0; //reset flag
-    //QuadC_LEDToggle(LED2);
 
   }
 
@@ -165,15 +170,15 @@ void GUI_com()
 
   if(gui_READpara)
   {
-    
 
     gui_READpara = 0; //reset flag
+
     //send parameter to pc
 
     gui_PARA[0]  = 1;                                 //motors enable                 - not implemented
-    gui_PARA[1]  = (uint8_t)(gyro_reverse & 0x01);   //gyro_roll_dir                 
-    gui_PARA[2]  = (uint8_t)(gyro_reverse & 0x02);   //gyro_pitch_dir                
-    gui_PARA[3]  = (uint8_t)(gyro_reverse & 0x04);   //gyro_yaw_dir                  
+    gui_PARA[1]  = (uint8_t)(gyro_reverse & 0x01);    //gyro_roll_dir                 
+    gui_PARA[2]  = (uint8_t)(gyro_reverse & 0x02);    //gyro_pitch_dir                
+    gui_PARA[3]  = (uint8_t)(gyro_reverse & 0x04);    //gyro_yaw_dir                  
     gui_PARA[4]  = 0;                                 //acc_x_dir                     - not implemented
     gui_PARA[5]  = 0;                                 //acc_y_dir                     - not implemented
     gui_PARA[6]  = (uint8_t)(K_p * 255);              //P_Gain
@@ -255,9 +260,12 @@ void GUI_com()
 
 /*******************************************************************************
 * Function Name  : GUI_receive()
-* Description    : 
-* Input          : None
-* Output         : None
+* Description    : This is the implementation of an interface to the MAV configuration GUI (TriGUI) by W. Thielicke.
+*                : http://shrediquette.blogspot.de/
+*                :
+*                : This function is called from within the UART RX ISR. It parses commands received and sets flags.
+* Input          : 
+* Output         : 
 * Return         : None
 *******************************************************************************/
 void GUI_receive(char c)
