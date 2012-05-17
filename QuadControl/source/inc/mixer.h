@@ -25,9 +25,11 @@ struct pdyaw
   int gyroneutrl;
 };
 
-
-#define GASLIMIT      20
-#define IDLE_THROTTLE 30
+//these parameters are only used if theres not value stored in the emulated eeprom
+#define GASLIMIT           20
+#define IDLE_THROTTLE      30
+#define LEVEL_STICK_SENSE  2.5
+#define YAW_STICK_SENSE    2
 
 
 

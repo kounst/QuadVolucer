@@ -35,13 +35,12 @@ void TimingDelay_Decrement  (void);
 
 
 
-
-#define P_GAIN                  0.122
-#define I_GAIN                  0
-#define D_GAIN                  0
-#define P_GAINY                 0.05
-#define I_GAINY                 0
-#define D_GAINY                 0
+//these parameters are only used if theres not value stored in the emulated eeprom
+#define P_GAIN                  0.666
+#define I_GAIN                  0.004
+#define D_GAIN                  0.196
+#define P_GAINY                 0.212
+#define I_GAINY                 0.02
 //-----------------------------------------------------------------
 
 /*Define names for Virtual addresses stored in: 
@@ -59,6 +58,8 @@ void TimingDelay_Decrement  (void);
 #define lowbat          0x4321
 #define idlethrottle    0x1122
 #define gyroreverse     0xAAAA
+#define levelsticksense 0xBBBB
+#define yawsticksense   0xCCCC
 
 
 

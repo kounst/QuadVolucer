@@ -19,6 +19,7 @@ extern union channels set;
 extern union pulsw pulswidth;
 extern float K_p, K_i, K_d;
 extern float K_pY, K_iY, K_dY;
+extern float level_stick_sense, yaw_stick_sense;
 extern uint8_t idle_throttle;
 extern uint16_t gyro_reverse;
 
@@ -140,6 +141,8 @@ void GUI_com()
     K_iY = (float)gui_PARA[12] / 255;
     idle_throttle = gui_PARA[20];
     low_bat = (uint16_t)gui_PARA[21] * 11.09;
+    level_stick_sense = (float)gui_PARA[16] / 16;
+    yaw_stick_sense = (float)gui_PARA[18] / 16;
     if(gui_PARA[1])
       gyro_reverse |= 0x01;
     else
@@ -163,6 +166,8 @@ void GUI_com()
     EE_WriteVariable(lowbat, (uint16_t)gui_PARA[21]);
     EE_WriteVariable(idlethrottle, (uint16_t)gui_PARA[20]);
     EE_WriteVariable(gyroreverse, (uint16_t)gyro_reverse);
+    EE_WriteVariable(levelsticksense, (uint16_t)gui_PARA[16]);
+    EE_WriteVariable(yawsticksense, (uint16_t)gui_PARA[18]);
     FLASH_Lock();
 
     gui_rx_finished = 0;                                                  //reset flag
@@ -191,9 +196,9 @@ void GUI_com()
     gui_PARA[13] = 0;                                 //ACC influence sensorfusion    - not implemented
     gui_PARA[14] = 0;                                 //acc_x scale                   - not implemented
     gui_PARA[15] = 0;                                 //acc_y scale                   - not implemented
-    gui_PARA[16] = 0;                                 //expo                          - not implemented
+    gui_PARA[16] = (uint8_t)(level_stick_sense * 16); //nick & roll stick sensitivity
     gui_PARA[17] = 0;                                 //expo                          - not implemented
-    gui_PARA[18] = 0;                                 //expo                          - not implemented
+    gui_PARA[18] = (uint8_t)(yaw_stick_sense * 16);   //yaw stick sensitivity
     gui_PARA[19] = 0;                                 //expo                          - not implemented
     gui_PARA[20] = idle_throttle;                     //minimum throttle  
     gui_PARA[21] = (uint8_t)((low_bat + 5) / 11.09);  //voltage warning    

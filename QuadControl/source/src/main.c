@@ -40,6 +40,7 @@ extern uint8_t idle_throttle;
 uint8_t lowbat_flag = 0;
 extern float K_p, K_i, K_d;                         //PID gain values for pitch & roll
 extern float K_pY, K_iY, K_dY;                      //PID gain values for yaw
+extern float level_stick_sense, yaw_stick_sense;    //roll, nick and yaw stick sensitivity
 
 /* Virtual address defined by the user: 0xFFFF value is prohibited */
 volatile uint16_t VirtAddVarTab[NumbOfVar] = {neutral_pw1, neutral_pw2, neutral_pw3, neutral_pw4, p_gain, i_gain, d_gain, p_gainy, i_gainy, d_gainy, lowbat, idlethrottle, gyroreverse};
@@ -427,6 +428,14 @@ void readeeprom(void)
     ;
   else                                                                      //else set to default
     gyro_reverse = 0x00;
+  if(!EE_ReadVariable(levelsticksense, (uint16_t *)&temp))                  //if variable exists
+    level_stick_sense = (float)temp / 16;
+  else                                                                      //else set to default
+    level_stick_sense = LEVEL_STICK_SENSE;
+  if(!EE_ReadVariable(yawsticksense, (uint16_t *)&temp))                    //if variable exists
+    yaw_stick_sense = (float)temp / 16;
+  else                                                                      //else set to default
+    yaw_stick_sense = YAW_STICK_SENSE;
 
 }
 

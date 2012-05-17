@@ -32,6 +32,9 @@ int differential_error1 =0;
 int differential_error2 =0;
 
 volatile float K_p, K_i, K_d;
+volatile float level_stick_sense, yaw_stick_sense;
+
+
 
 int temp;
 
@@ -61,9 +64,9 @@ void mixer()
 {
 	//throttle: 0 ... 4000; roll,pitch,yaw: -2000 ... 2000;
   set.rotate.throttle = (pulswidth.puls.pw4 - neutral.rotate.throttle) * 1.67; 
-	set.rotate.roll = (-pulswidth.puls.pw1 + neutral.rotate.roll) * 2.5;
-  set.rotate.pitch = (pulswidth.puls.pw2 - neutral.rotate.pitch) * 2.5;
-  set.rotate.yaw = (pulswidth.puls.pw3 - neutral.rotate.yaw) * 4;
+	set.rotate.roll = (-pulswidth.puls.pw1 + neutral.rotate.roll) * level_stick_sense;
+  set.rotate.pitch = (pulswidth.puls.pw2 - neutral.rotate.pitch) * level_stick_sense;
+  set.rotate.yaw = (pulswidth.puls.pw3 - neutral.rotate.yaw) * yaw_stick_sense;
 
 
 
