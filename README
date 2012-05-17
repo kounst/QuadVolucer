@@ -5,6 +5,10 @@ QuadVolucer is a Quadcopter project basend on the STM32 Microcontroller. It uses
 The aim of this project is not to develop a Copter which is as stable as possible but to leave control to the pilot. Therefore control is HH only.
 To archive this no ACCs are needed. There is a footprint for a 3-axis ACC on the PCB though. So angular control could be implemented but I'm propably not going to do so.
 
+>daGloane
+
+daGloane is a Quadcopter with a lift of weight of less than 50gramms. 
+
 
 >canBLC
 
