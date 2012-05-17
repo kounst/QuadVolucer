@@ -8,7 +8,7 @@
 
 
 /* Includes ------------------------------------------------------------------*/
-#include  "stm32f10x.h"
+#include "stm32f10x.h"
 #include "mixer.h"
 #include "main.h"
 #include "GPIO.h"
@@ -63,7 +63,7 @@ void mixer()
   set.rotate.throttle = (pulswidth.puls.pw4 - neutral.rotate.throttle) * 1.67; 
 	set.rotate.roll = (-pulswidth.puls.pw1 + neutral.rotate.roll) * 2.5;
   set.rotate.pitch = (pulswidth.puls.pw2 - neutral.rotate.pitch) * 2.5;
-  set.rotate.yaw = (pulswidth.puls.pw3 - neutral.rotate.yaw) * 2.5;
+  set.rotate.yaw = (pulswidth.puls.pw3 - neutral.rotate.yaw) * 4;
 
 
 
