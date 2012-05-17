@@ -12,9 +12,11 @@ canBLC
 
 canBLC is a motor controller for BLDC motors. It is meant to be used with multicopters like the QuadVolucer. As an interface it will support I2C, PWM and of cause high speed CAN.
 
-	status:	- Hardware design is finished 
+	status:	
+		- Hardware design is finished 
 		- Software basic features working (only CAN support)
 
-	todo:	- extensive testing
+	todo:	
+		- extensive testing
 		- testing on the QuadVolucer :-)
 		- implementation of PWM and I2C interface.
