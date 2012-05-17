@@ -160,8 +160,18 @@ void levelcontroller(int16_t gyro, int axis)
 
 void yawcontroller(int16_t gyro)
 {
-
   yaw.yawerror = set.rotate.yaw + gyro*2;
+
+  if(pwrmode == flight)
+    yaw.yawerror_int += yaw.yawerror;
+  else
+    yaw.yawerror_int = 0; 
+
+	if(yaw.yawerror_int > 20000)
+	  yaw.yawerror_int = 20000;
+	if(yaw.yawerror_int < -20000)
+	  yaw.yawerror_int = -20000;
+
 
   yaw.yawsign = K_pY * yaw.yawerror + K_iY * yaw.yawerror_int - K_dY * (yaw.yawerror - yaw.yawlasterror);
 
