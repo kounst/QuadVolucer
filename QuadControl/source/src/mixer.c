@@ -140,9 +140,9 @@ void levelcontroller(int16_t gyro, int axis)
 	if(level.levelerror_int[axis] < -20000)
 	  level.levelerror_int[axis] = -20000;
 
-  differential_error = (level.levelerror[axis] - level.levellasterror[axis]) + differential_error1 + differential_error2;
-  differential_error2 = differential_error1;
-  differential_error1 = (level.levelerror[axis] - level.levellasterror[axis]);
+  differential_error = (level.levelerror[axis] - level.levellasterror[axis]) + level.levelerror_dif1[axis] + level.levelerror_dif2[axis];
+  level.levelerror_dif2[axis] = level.levelerror_dif1[axis];
+  level.levelerror_dif1[axis] = (level.levelerror[axis] - level.levellasterror[axis]);
   
 
   //differential_error = 

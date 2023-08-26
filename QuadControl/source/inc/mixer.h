@@ -12,6 +12,8 @@ struct pid
   int levelerror[2];
   int levellasterror[2];
   int levelerror_int[2];
+	int levelerror_dif1[2];
+	int levelerror_dif2[2];
   int levelsign[2];
   int gyroneutrl[2];
 };
