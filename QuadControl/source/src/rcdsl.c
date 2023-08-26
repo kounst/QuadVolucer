@@ -38,7 +38,7 @@
 */
 
 
-#include "stm32f10x_lib.h"
+#include "stm32f10x.h"
 #include "main.h"
 #include "rcdsl.h"
 

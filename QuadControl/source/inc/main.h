@@ -41,6 +41,7 @@ void TimingDelay_Decrement  (void);
 #define D_GAIN                  0.196
 #define P_GAINY                 0.212
 #define I_GAINY                 0.02
+#define D_GAINY									0
 //-----------------------------------------------------------------
 
 /*Define names for Virtual addresses stored in: 
